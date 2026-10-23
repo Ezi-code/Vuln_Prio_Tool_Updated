@@ -1,0 +1,40 @@
+{
+  "created": "2026-10-21T11:25:55",
+  "note": "Frozen before the test period. Do not edit after viewing test results.",
+  "train_data": "data/processed/vulns_train.csv",
+  "train_data_sha256_16": "a2f18397a8a802a4",
+  "train_cutoff": "2023-06-30",
+  "label_horizon_end": "2024-06-30",
+  "train_pool": 125215,
+  "train_positives": 37,
+  "epss_model_version": "v2023.03.01",
+  "stage1": {
+    "rule": "smallest EPSS threshold within 5% of the pool",
+    "epss_threshold": 0.01864,
+    "also_in_kev_at_cutoff": true,
+    "youden_j_threshold_for_reference": 0.00562
+  },
+  "stage2": {
+    "tier_order": [
+      "Low",
+      "Medium",
+      "High",
+      "Critical"
+    ],
+    "weighting": "strict tiers (specified design)"
+  },
+  "stage3": {
+    "within_tier": "CVSS base score",
+    "remaining_ties": "EPSS"
+  },
+  "budgets_evaluated": [
+    0.02,
+    0.05,
+    0.1
+  ],
+  "inventories": {
+    "n": 300,
+    "seed": 42,
+    "catalogue_sha256_12": "cc54e64a46ab"
+  }
+}

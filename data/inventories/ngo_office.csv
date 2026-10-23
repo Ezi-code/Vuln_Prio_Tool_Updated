@@ -1,0 +1,8 @@
+asset_id,asset_name,software,exposure,data_sensitivity,business_function,redundancy
+N1,Staff workstations,microsoft:windows_10;microsoft:windows_11;microsoft:office;google:chrome;mozilla:firefox;adobe:acrobat_reader,0,1,1,0
+N2,File server,microsoft:windows_server_2019,0,2,2,2
+N3,Public website,wordpress:wordpress;php:php;apache:http_server;oracle:mysql,3,1,1,2
+N4,Mail server,microsoft:exchange_server,3,2,2,3
+N5,Firewall,fortinet:fortios,3,1,3,3
+N6,Donor database,postgresql:postgresql;linux:linux_kernel,0,3,2,2
+N7,Office router,mikrotik:routeros,2,0,1,3

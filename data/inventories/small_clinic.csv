@@ -1,0 +1,8 @@
+asset_id,asset_name,software,exposure,data_sensitivity,business_function,redundancy
+C1,Patient records server,microsoft:windows_server_2022;microsoft:sql_server,0,3,3,3
+C2,Reception PCs,microsoft:windows_10;microsoft:office;google:chrome,0,2,2,1
+C3,Clinic website,wordpress:wordpress;php:php;f5:nginx,3,0,0,1
+C4,Imaging workstation,microsoft:windows_10,0,3,3,3
+C5,VPN gateway,paloaltonetworks:pan-os,3,2,3,3
+C6,Backup NAS,linux:linux_kernel;samba:samba,0,3,2,1
+C7,Wi-Fi router,mikrotik:routeros,2,0,1,3

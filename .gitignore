@@ -1,0 +1,14 @@
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+*.log
+.DS_Store
+
+# Raw source data; can be obtained separately
+data/raw/
+
+# Exclude accidental nested clone
+/Vuln_Prio_Tool/

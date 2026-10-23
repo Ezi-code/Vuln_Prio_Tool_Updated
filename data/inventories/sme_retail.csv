@@ -1,0 +1,8 @@
+asset_id,asset_name,software,exposure,data_sensitivity,business_function,redundancy
+R1,Point-of-sale terminals,microsoft:windows_10,0,3,3,2
+R2,Online shop,wordpress:wordpress;php:php;f5:nginx;oracle:mysql,3,3,3,3
+R3,Accounting PC,microsoft:windows_11;microsoft:office,0,3,2,2
+R4,Router / firewall,fortinet:fortios,3,1,3,3
+R5,Staff laptops,microsoft:windows_11;google:chrome;microsoft:edge_chromium,0,1,1,0
+R6,Inventory server,microsoft:windows_server_2019;microsoft:sql_server,0,2,3,3
+R7,CCTV recorder,linux:linux_kernel,1,1,1,2
