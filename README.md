@@ -110,13 +110,13 @@ cd Vuln\_Prio\_Tool
 
 py -m venv .venv
 
-.\\.venv\\Scripts\\Activate.ps1
+Activate using CMD venv\Scripts\Activate.bat
+Activate using powershell .venv\Scripts\Activate.ps1
+Activate using bash - $ source .venv/Scripts/activate
 
 python -m pip install -r requirements.txt
 
 ```
-
-
 
 If PowerShell prevents virtual-environment activation, you can run the Python commands using `.\\.venv\\Scripts\\python.exe` instead.
 
