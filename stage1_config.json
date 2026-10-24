@@ -1,0 +1,32 @@
+{
+  "created": "2026-10-24T15:36:29",
+  "stage": "Stage 1 threat gate (section 5.2.1)",
+  "criterion": "coverage",
+  "rule": "strictest gate keeping coverage >= 50%",
+  "target_coverage": 0.5,
+  "budget": 0.05,
+  "train_data": "data/processed/vulns_train.csv",
+  "train_data_sha256_16": "a2f18397a8a802a4",
+  "train_cutoff": "2023-06-30",
+  "label_horizon_end": "2024-06-30",
+  "train_pool": 125215,
+  "train_positives": 37,
+  "epss_model_version": "v2023.03.01",
+  "epss_threshold": 0.04267,
+  "pool_share_at_threshold": 0.032504,
+  "efficiency_at_threshold": 0.00467,
+  "coverage_at_threshold": 0.5135,
+  "bootstrap_threshold_median_and_95pct_range": [
+    0.04267,
+    0.00244,
+    0.73623
+  ],
+  "policy": {
+    "kev": "flagged if listed in KEV on or before the cutoff",
+    "missing_epss": "treated as 0, so not flagged unless in KEV",
+    "unflagged": "deprioritized, never discarded"
+  },
+  "reference": {
+    "vmc_threshold": 0.088
+  }
+}
