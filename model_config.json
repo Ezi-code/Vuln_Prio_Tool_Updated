@@ -1,18 +1,17 @@
 {
-  "created": "2026-10-21T11:25:55",
-  "note": "Frozen before the test period. Do not edit after viewing test results.",
+  "created": "2026-11-07T00:31:38",
+  "note": "Frozen before the untouched test period. Do not edit after viewing test results.",
   "train_data": "data/processed/vulns_train.csv",
-  "train_data_sha256_16": "a2f18397a8a802a4",
   "train_cutoff": "2023-06-30",
   "label_horizon_end": "2024-06-30",
-  "train_pool": 125215,
-  "train_positives": 37,
   "epss_model_version": "v2023.03.01",
   "stage1": {
-    "rule": "smallest EPSS threshold within 5% of the pool",
-    "epss_threshold": 0.01864,
-    "also_in_kev_at_cutoff": true,
-    "youden_j_threshold_for_reference": 0.00562
+    "source": "stage1_config.json",
+    "criterion": "coverage",
+    "rule": "strictest gate keeping coverage >= 50%",
+    "epss_threshold": 0.04267,
+    "pool_share_at_threshold": 0.032504,
+    "also_in_kev_at_cutoff": true
   },
   "stage2": {
     "tier_order": [
@@ -27,14 +26,6 @@
     "within_tier": "CVSS base score",
     "remaining_ties": "EPSS"
   },
-  "budgets_evaluated": [
-    0.02,
-    0.05,
-    0.1
-  ],
-  "inventories": {
-    "n": 300,
-    "seed": 42,
-    "catalogue_sha256_12": "cc54e64a46ab"
-  }
+  "stage2_decision": "alternatives better at primary budget: ['S2>S1>S3 (tier first)']",
+  "stage2_config": "stage2_config.json"
 }

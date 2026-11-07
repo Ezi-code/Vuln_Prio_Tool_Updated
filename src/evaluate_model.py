@@ -18,6 +18,7 @@ difference against a named baseline.
 
 Usage:
     python src/evaluate_model.py --cutoff 2024-06-30 --horizon-end 2025-06-30
+    python src/evaluate_model.py --cutoff 2024-06-30 --horizon-end 2025-06-30 --budgets 0.1,0.2,0.3
 
 For a period scored with a different EPSS model version, re-apply the frozen
 RULE (label-free) instead of the frozen number:
@@ -74,6 +75,15 @@ def sample_inventory(rng, weights):
     return assets
 
 
+def kN(N, n):
+    """N items, or a share N<1 of an n-item list (predefined patching budget)."""
+    return max(1, int(round(N * n))) if isinstance(N, float) else N
+
+
+def nlabel(N):
+    return f"{N:.0%}" if isinstance(N, float) else str(N)
+
+
 def positions(order, n):
     pos = np.empty(n)
     pos[order.index.to_numpy()] = np.arange(n)
@@ -89,6 +99,8 @@ def main():
     ap.add_argument("--rederive-threshold", action="store_true")
     ap.add_argument("--budget", type=float, default=0.05)
     ap.add_argument("--ns", default="50,100,250,500,1000")
+    ap.add_argument("--budgets", default=None,
+                    help="predefined patching budgets as shares of each list, e.g. 0.1,0.2,0.3 (replaces --ns)")
     ap.add_argument("--n", type=int, default=300)
     ap.add_argument("--reps", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=123)
@@ -97,15 +109,17 @@ def main():
     a = ap.parse_args()
     pd.set_option("display.width", 240)
     rng = np.random.default_rng(a.seed)
-    NS = tuple(int(x) for x in a.ns.split(","))
+    NS = (tuple(float(x) for x in a.budgets.split(",")) if a.budgets
+          else tuple(int(x) for x in a.ns.split(",")))
 
     cfg = json.loads(Path(a.config).read_text())
     df = load(a.data, a.cutoff, a.horizon_end)
     df["products"] = df["products"].fillna("")
     base = df[~df["kev_at_cutoff"]].reset_index(drop=True)
     if a.rederive_threshold:
-        thr = float(base["epss"].quantile(1 - a.budget))
-        how = f"frozen RULE re-applied to this period (top {a.budget:.0%} of the pool)"
+        share = float(cfg["stage1"].get("pool_share_at_threshold", a.budget))
+        thr = float(base["epss"].quantile(1 - share))
+        how = f"frozen Stage 1 pool share re-applied to this period (top {share:.2%} of the pool, label-free)"
     else:
         thr = float(cfg["stage1"]["epss_threshold"])
         how = f"frozen number from {a.config} (created {cfg['created']})"
@@ -124,7 +138,7 @@ def main():
     if a.rederive_threshold:   # EPSS scales differ between model versions: use pool shares
         q = lambda share: float(base["epss"].quantile(1 - share))
         SENS_T = {"gate off": 0.0, "top 20%": q(0.20), "top 10%": q(0.10),
-                  f"top {a.budget:.0%} (RULE)": thr, "top 2%": q(0.02),
+                  "Stage 1 share (FROZEN)": thr, "top 2%": q(0.02),
                   "top 1%": q(0.01), "top 0.5%": q(0.005)}
     else:
         SENS_T = {"gate off": 0.0, "0.005": 0.005, f"{thr:.5f} (FROZEN)": thr,
@@ -169,11 +183,11 @@ def main():
 
         for s, o in orders.items():
             for N in NS:
-                top = o.head(N)
+                top = o.head(kN(N, n))
                 Fm[(s, N)].append(found_of(top))
                 prec[(s, N)].append(top["exploited_after"].sum() / max(len(top), 1))
         for N in NS:
-            Fm[("Random", N)].append(present * min(N, n) / n)
+            Fm[("Random", N)].append(present * min(kN(N, n), n) / n)
             prec[("Random", N)].append(pool["exploited_after"].mean())
         pm = positions(model_o, n)
         for b in BASES:
@@ -197,7 +211,7 @@ def main():
                 for ln, lam in SENS_L.items():
                     o = rank_pool(pool, t, lam)
                     for N in SENS_N:
-                        Fm[(f"S|{tn}|{ln}", N)].append(found_of(o.head(N)))
+                        Fm[(f"S|{tn}|{ln}", N)].append(found_of(o.head(kN(N, n))))
         rows.append(row)
 
     res = pd.DataFrame(rows)
@@ -210,14 +224,14 @@ def main():
 
     f2 = lambda m, arr: fmt(m, arr).replace("+", "")
     print("\n=== 1. COVERAGE: Recall@N, mean [95% CI] (inventories and positives resampled) ===")
-    print(pd.DataFrame({f"R@{N}": {s: f2(pt[("recall", s, N)], boot[("recall", s, N)])
+    print(pd.DataFrame({f"R@{nlabel(N)}": {s: f2(pt[("recall", s, N)], boot[("recall", s, N)])
                                     for s in STRATS} for N in NS}).to_string())
     print("\n--- Model MINUS each baseline (a CI that excludes 0 holds up) ---")
-    print(pd.DataFrame({f"R@{N}": {b: fmt(pt[("recall", "Model", N)] - pt[("recall", b, N)],
+    print(pd.DataFrame({f"R@{nlabel(N)}": {b: fmt(pt[("recall", "Model", N)] - pt[("recall", b, N)],
                                          boot[("recall", "Model", N)] - boot[("recall", b, N)])
                                     for b in BASES + ["Random"]} for N in NS}).to_string())
     print("\n=== Precision@N, mean [95% CI over inventories] ===")
-    print(pd.DataFrame({f"P@{N}": {s: ci(np.array(prec[(s, N)]), rng) for s in STRATS}
+    print(pd.DataFrame({f"P@{nlabel(N)}": {s: ci(np.array(prec[(s, N)]), rng) for s in STRATS}
                         for N in NS}).to_string())
 
     print("\n=== 2. WORKLOAD: urgent-list size and coverage of later-exploited CVEs ===")

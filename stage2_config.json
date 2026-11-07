@@ -1,0 +1,52 @@
+{
+  "created": "2026-11-07T00:31:38",
+  "stage": "Stage 2 and Stage 3 (section 5.2.1)",
+  "development_data": "data/processed/vulns_train.csv",
+  "development_data_sha256_16": "a2f18397a8a802a4",
+  "train_cutoff": "2023-06-30",
+  "label_horizon_end": "2024-06-30",
+  "development_positives": 37,
+  "stage1_config": "stage1_config.json",
+  "configurations_compared": [
+    "S1>S2>S3 strict tiers (SPEC)",
+    "S1>S2>S3 weight 1",
+    "S1>S2>S3 weight 0.5",
+    "S1>S3>S2 (CVSS first, tier breaks ties)",
+    "S2>S1>S3 (tier first)",
+    "S1>S3 (no criticality)",
+    "S1 only (EPSS order)"
+  ],
+  "budgets": [
+    0.01,
+    0.02,
+    0.05,
+    0.1,
+    0.2,
+    0.3
+  ],
+  "primary_budget": 0.05,
+  "decision_rule": "keep the specified design unless an alternative beats it at the primary budget with a paired 95% interval above zero",
+  "decision": "alternatives better at primary budget: ['S2>S1>S3 (tier first)']",
+  "design": {
+    "order": "Stage 1 gate > Stage 2 criticality tier > Stage 3 CVSS",
+    "stage2_weighting": "strict tiers (specified design)",
+    "tier_order": [
+      "Low",
+      "Medium",
+      "High",
+      "Critical"
+    ],
+    "stage3_within_tier": "CVSS base score; remaining ties by EPSS"
+  },
+  "inventories": {
+    "n_used": 300,
+    "seed": 42,
+    "sectors": [
+      "NGO office",
+      "Clinic",
+      "School / university",
+      "Retail SME"
+    ],
+    "catalogue_sha256_12": "cc54e64a46ab"
+  }
+}
