@@ -11,14 +11,18 @@ Metrics
   Feasibility         time to match and rank an inventory on this machine
 Baselines (5.5): CVSS-only, EPSS/KEV-only, FIFO (+ a random reference row).
 Validation (5.6): KEV/EPSS frozen at the cutoff; labels = KEV additions after
-the cutoff, up to --horizon-end. The threshold is read from model_config.json
-and is NOT changed here. Inventories vary in size and sector. Intervals
-resample inventories AND the later-exploited CVEs; every claim is a paired
-difference against a named baseline.
+the cutoff, up to --horizon-end. By default the threshold is read from
+model_config.json and is NOT changed here. --gate-share optionally replaces it
+with a label-free, per-inventory top-q% EPSS gate (the candidate experiment).
+Inventories vary in size and sector. Intervals resample inventories AND the
+later-exploited CVEs; every claim is a paired difference against a named
+baseline.
 
 Usage:
     python src/evaluate_model.py --cutoff 2024-06-30 --horizon-end 2025-06-30
     python src/evaluate_model.py --cutoff 2024-06-30 --horizon-end 2025-06-30 --budgets 0.1,0.2,0.3
+    python src/evaluate_model.py --cutoff 2024-06-30 --horizon-end 2025-06-30 \
+        --gate-share 0.02 --outdir results/optimized
 
 For a period scored with a different EPSS model version, re-apply the frozen
 RULE (label-free) instead of the frozen number:
@@ -97,6 +101,12 @@ def main():
     ap.add_argument("--horizon-end", default=None)
     ap.add_argument("--config", default="model_config.json")
     ap.add_argument("--rederive-threshold", action="store_true")
+    ap.add_argument("--gate-share", type=float, default=None,
+                    help="Label-free Stage 1 alternative: gate the top share "
+                         "of each inventory's EPSS distribution (e.g. 0.02). "
+                         "Overrides the fixed threshold for the Model row.")
+    ap.add_argument("--outdir", default="results",
+                    help="Directory for per-inventory and summary outputs")
     ap.add_argument("--budget", type=float, default=0.05)
     ap.add_argument("--ns", default="50,100,250,500,1000")
     ap.add_argument("--budgets", default=None,
@@ -107,10 +117,14 @@ def main():
     ap.add_argument("--sensitivity", action="store_true",
                     help="section 5.6: vary Stage 1 threshold and criticality weight (descriptive only)")
     a = ap.parse_args()
+    if a.gate_share is not None and not 0 < a.gate_share < 1:
+        raise SystemExit("--gate-share must be between 0 and 1 (e.g. 0.02)")
     pd.set_option("display.width", 240)
     rng = np.random.default_rng(a.seed)
     NS = (tuple(float(x) for x in a.budgets.split(",")) if a.budgets
           else tuple(int(x) for x in a.ns.split(",")))
+    outdir = Path(a.outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
 
     cfg = json.loads(Path(a.config).read_text())
     df = load(a.data, a.cutoff, a.horizon_end)
@@ -123,11 +137,17 @@ def main():
     else:
         thr = float(cfg["stage1"]["epss_threshold"])
         how = f"frozen number from {a.config} (created {cfg['created']})"
+    if a.gate_share is not None:
+        gate_label = f"per-inventory top {a.gate_share:.1%} EPSS gate (label-free)"
+    else:
+        gate_label = f"fixed EPSS threshold {thr:.5f}: {how}"
     pos_ids = base.loc[base["exploited_after"], "cve_id"].to_numpy()
     pos_index = {c: i for i, c in enumerate(pos_ids)}
     P = len(pos_ids)
     print(f"Test pool: {len(base)} CVEs, {P} later-exploited (labels to "
-          f"{a.horizon_end or 'today'}). EPSS threshold {thr:.5f}: {how}")
+          f"{a.horizon_end or 'today'}). Model gate: {gate_label}")
+    if a.gate_share is not None:
+        print(f"  (fixed threshold {thr:.5f} is retained for the sensitivity table only)")
 
     tokens = {t for _, opts, *_ in CATALOGUE for o in opts for t in o}
     sets = token_cve_sets(explode_products(base), tokens)
@@ -167,7 +187,7 @@ def main():
         idx = pool.loc[pool["exploited_after"], "cve_id"].map(pos_index).to_numpy()
         present[idx] = 1.0
         t2 = time.perf_counter()
-        model_o = rank_pool(pool, thr, None)
+        model_o = rank_pool(pool, thr, None, gate_share=a.gate_share)
         t3 = time.perf_counter()
         orders = {"Model": model_o, "CVSS-only": rank_cvss_only(pool),
                   "EPSS/KEV-only": rank_epss_kev_only(pool), "FIFO": rank_fifo(pool)}
@@ -196,7 +216,11 @@ def main():
             for N in (100, 250):
                 ovl[(b, N)].append(len(np.intersect1d(
                     model_o.index[:N], orders[b].index[:N])) / N)
-        gate = pool["kev_at_cutoff"] | (pool["epss"] >= thr)
+        if a.gate_share is not None:
+            gate_cut = float(pool["epss"].quantile(1 - a.gate_share))
+        else:
+            gate_cut = thr
+        gate = pool["kev_at_cutoff"] | (pool["epss"] >= gate_cut)
         urg = {"UrgModel": gate, "UrgCVSS7": pool["cvss"] >= 7.0,
                "UrgAll": pd.Series(True, index=pool.index)}
         row = {"sector": sector, "pool": n, "positives": int(present.sum())}
@@ -276,15 +300,62 @@ def main():
             print(pd.DataFrame({ln: {tn: round(pt[("recall", f"S|{tn}|{ln}", N)], 3)
                                      for tn in SENS_T} for ln in SENS_L}).to_string())
 
-    print("\n=== By sector: Recall@250 (point estimates) ===")
-    sec = pd.DataFrame({s: [F[(s, 250)][i].sum() / M[i].sum() for i in range(len(M))]
+    ref_n = NS[0]
+    print(f"\n=== By sector: Recall @ {nlabel(ref_n)} (point estimates) ===")
+    sec = pd.DataFrame({s: [F[(s, ref_n)][i].sum() / M[i].sum() for i in range(len(M))]
                         for s in STRATS})
     sec["sector"] = sector_of
-    print(sec.groupby("sector").mean().round(3).to_string())
+    sec_summary = sec.groupby("sector").mean().round(3)
+    print(sec_summary.to_string())
 
-    Path("results").mkdir(exist_ok=True)
-    res.to_csv(f"results/evaluation_{a.cutoff}.csv", index=False)
-    print(f"\nPer-inventory sizes saved to results/evaluation_{a.cutoff}.csv")
+    res.to_csv(outdir / f"evaluation_{a.cutoff}.csv", index=False)
+
+    def mean_ci(arr):
+        lo, hi = np.nanpercentile(arr, [2.5, 97.5])
+        return {"mean": float(np.nanmean(arr)),
+                "ci95": [float(lo), float(hi)]}
+
+    summary = {
+        "created": pd.Timestamp.now().isoformat(timespec="seconds"),
+        "data": a.data, "config": a.config,
+        "cutoff": a.cutoff, "horizon_end": a.horizon_end,
+        "fixed_threshold": float(thr), "gate_share": a.gate_share,
+        "gate_label": gate_label,
+        "inventories": int(len(res)),
+        "pool": {"min": int(res["pool"].min()),
+                 "max": int(res["pool"].max()),
+                 "mean": float(res["pool"].mean())},
+        "positives": {"global": int(P),
+                      "mean_per_inventory": float(res["positives"].mean())},
+        "recall": {s: {nlabel(N): {"point": float(pt[("recall", s, N)]),
+                                    "ci95": [float(x) for x in np.nanpercentile(
+                                        boot[("recall", s, N)], [2.5, 97.5])]}
+                       for N in NS} for s in STRATS},
+        "precision": {s: {nlabel(N): mean_ci(np.array(prec[(s, N)]))
+                          for N in NS} for s in STRATS},
+        "workload": {
+            "model_urgent_mean_size": float(res["UrgModel"].mean()),
+            "model_urgent_pct_of_list": float(100 * (res["UrgModel"] / res["UrgAll"]).mean()),
+            "model_urgent_coverage": float(pt[("recall", "UrgModel", 0)]),
+            "cvss7_mean_size": float(res["UrgCVSS7"].mean()),
+            "cvss7_pct_of_list": float(100 * (res["UrgCVSS7"] / res["UrgAll"]).mean()),
+            "cvss7_coverage": float(pt[("recall", "UrgCVSS7", 0)]),
+        },
+        "ranking": {
+            "spearman": {b: mean_ci(np.array(rho[b])) for b in BASES},
+            "top100_overlap": {b: mean_ci(np.array(ovl[(b, 100)])) for b in BASES},
+            "top250_overlap": {b: mean_ci(np.array(ovl[(b, 250)])) for b in BASES},
+        },
+        "timing_ms": {
+            "match_median": float(np.median(tm)),
+            "rank_median": float(np.median(tr)),
+        },
+        "by_sector": sec_summary.to_dict(orient="index"),
+    }
+    (outdir / f"evaluation_{a.cutoff}_summary.json").write_text(
+        json.dumps(summary, indent=2, default=float), encoding="utf-8")
+    print(f"\nPer-inventory sizes saved to {outdir / f'evaluation_{a.cutoff}.csv'}")
+    print(f"Full metrics summary saved to {outdir / f'evaluation_{a.cutoff}_summary.json'}")
     print("5. Instrument usability: practitioner review (not computable here).")
 
 

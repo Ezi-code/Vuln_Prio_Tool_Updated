@@ -1,101 +1,101 @@
-cve_id,asset_name,tier,cvss,epss,gate,exploited_after,reason
-CVE-2021-28480,Mail server,Critical,9.8,0.04064,True,False,EPSS 0.041 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 9.8
-CVE-2021-28481,Mail server,Critical,9.8,0.04064,True,False,EPSS 0.041 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 9.8
-CVE-2021-26412,Mail server,Critical,9.1,0.04114,True,False,EPSS 0.041 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 9.1
-CVE-2021-27078,Mail server,Critical,9.1,0.04114,True,False,EPSS 0.041 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 9.1
-CVE-2022-21846,Mail server,Critical,9.0,0.00508,True,False,EPSS 0.005 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 9.0
-CVE-2022-21855,Mail server,Critical,9.0,0.00508,True,False,EPSS 0.005 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 9.0
-CVE-2022-21969,Mail server,Critical,9.0,0.00508,True,False,EPSS 0.005 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 9.0
-CVE-2023-21707,Mail server,Critical,8.8,0.57499,True,False,EPSS 0.575 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.8
-CVE-2023-32031,Mail server,Critical,8.8,0.08776,True,False,EPSS 0.088 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.8
-CVE-2023-38181,Mail server,Critical,8.8,0.0188,True,False,EPSS 0.019 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.8
-CVE-2021-28482,Mail server,Critical,8.8,0.01656,True,False,EPSS 0.017 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.8
-CVE-2022-23277,Mail server,Critical,8.8,0.01439,True,False,EPSS 0.014 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.8
-CVE-2023-21529,Mail server,Critical,8.8,0.01192,True,False,EPSS 0.012 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.8
-CVE-2023-21706,Mail server,Critical,8.8,0.00762,True,False,EPSS 0.008 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.8
-CVE-2023-38185,Mail server,Critical,8.8,0.0076,True,False,EPSS 0.008 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.8
-CVE-2024-26198,Mail server,Critical,8.8,0.00535,True,False,EPSS 0.005 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.8
-CVE-2023-21762,Mail server,Critical,8.0,0.07608,True,False,EPSS 0.076 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.0
-CVE-2022-41078,Mail server,Critical,8.0,0.04477,True,False,EPSS 0.045 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.0
-CVE-2022-41079,Mail server,Critical,8.0,0.04477,True,False,EPSS 0.045 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.0
-CVE-2023-21745,Mail server,Critical,8.0,0.03302,True,False,EPSS 0.033 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 8.0
-CVE-2021-31198,Mail server,Critical,7.8,0.01489,True,False,EPSS 0.015 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 7.8
-CVE-2021-31206,Mail server,Critical,7.6,0.28405,True,False,EPSS 0.284 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 7.6
-CVE-2023-21710,Mail server,Critical,7.2,0.01641,True,False,EPSS 0.016 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 7.2
-CVE-2021-31196,Mail server,Critical,7.2,0.01258,True,True,EPSS 0.013 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 7.2
-CVE-2021-26854,Mail server,Critical,6.6,0.01074,True,False,EPSS 0.011 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 6.6
-CVE-2021-41349,Mail server,Critical,6.5,0.95705,True,False,EPSS 0.957 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 6.5
-CVE-2021-31195,Mail server,Critical,6.5,0.91714,True,False,EPSS 0.917 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 6.5
-CVE-2021-31209,Mail server,Critical,6.5,0.10974,True,False,EPSS 0.110 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 6.5
-CVE-2022-30134,Mail server,Critical,6.5,0.02098,True,False,EPSS 0.021 is above the 0.005 threshold; affects Mail server (tier Critical); CVSS 6.5
-CVE-2021-26691,Public website,High,9.8,0.70597,True,False,EPSS 0.706 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2022-23943,Public website,High,9.8,0.10438,True,False,EPSS 0.104 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2021-44790,Public website,High,9.8,0.08808,True,False,EPSS 0.088 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2021-3711,Public website,High,9.8,0.06789,True,False,EPSS 0.068 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2021-43267,Donor database,High,9.8,0.04341,True,False,EPSS 0.043 is above the 0.005 threshold; affects Donor database (tier High); CVSS 9.8
-CVE-2022-37454,Public website,High,9.8,0.02474,True,False,EPSS 0.025 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2021-22931,Public website,High,9.8,0.01529,True,False,EPSS 0.015 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2022-31813,Public website,High,9.8,0.01043,True,False,EPSS 0.010 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2022-47939,Donor database,High,9.8,0.0087,True,False,EPSS 0.009 is above the 0.005 threshold; affects Donor database (tier High); CVSS 9.8
-CVE-2021-3773,Donor database,High,9.8,0.008,True,False,EPSS 0.008 is above the 0.005 threshold; affects Donor database (tier High); CVSS 9.8
-CVE-2022-22720,Public website,High,9.8,0.00753,True,False,EPSS 0.008 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2020-36326,Public website,High,9.8,0.00748,True,False,EPSS 0.007 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2023-25690,Public website,High,9.8,0.00739,True,False,EPSS 0.007 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2021-39275,Public website,High,9.8,0.00648,True,False,EPSS 0.006 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.8
-CVE-2022-28615,Public website,High,9.1,0.01472,True,False,EPSS 0.015 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.1
-CVE-2021-22945,Public website,High,9.1,0.00688,True,False,EPSS 0.007 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.1
-CVE-2022-36760,Public website,High,9.0,0.03274,True,False,EPSS 0.033 is above the 0.005 threshold; affects Public website (tier High); CVSS 9.0
-CVE-2023-5178,Donor database,High,8.8,0.02426,True,False,EPSS 0.024 is above the 0.005 threshold; affects Donor database (tier High); CVSS 8.8
-CVE-2023-5869,Donor database,High,8.8,0.0145,True,False,EPSS 0.015 is above the 0.005 threshold; affects Donor database (tier High); CVSS 8.8
-CVE-2022-0435,Donor database,High,8.8,0.01338,True,False,EPSS 0.013 is above the 0.005 threshold; affects Donor database (tier High); CVSS 8.8
-CVE-2022-42719,Donor database,High,8.8,0.00994,True,False,EPSS 0.010 is above the 0.005 threshold; affects Donor database (tier High); CVSS 8.8
-CVE-2022-23307,Public website,High,8.8,0.00846,True,False,EPSS 0.008 is above the 0.005 threshold; affects Public website (tier High); CVSS 8.8
-CVE-2021-32027,Donor database,High,8.8,0.00703,True,False,EPSS 0.007 is above the 0.005 threshold; affects Donor database (tier High); CVSS 8.8
-CVE-2022-47942,Donor database,High,8.8,0.00569,True,False,EPSS 0.006 is above the 0.005 threshold; affects Donor database (tier High); CVSS 8.8
-CVE-2022-23302,Public website,High,8.8,0.00543,True,False,EPSS 0.005 is above the 0.005 threshold; affects Public website (tier High); CVSS 8.8
-CVE-2021-3517,Public website,High,8.6,0.01688,True,False,EPSS 0.017 is above the 0.005 threshold; affects Public website (tier High); CVSS 8.6
-CVE-2021-44224,Public website,High,8.2,0.30749,True,False,EPSS 0.307 is above the 0.005 threshold; affects Public website (tier High); CVSS 8.2
-CVE-2022-21824,Public website,High,8.2,0.00581,True,False,EPSS 0.006 is above the 0.005 threshold; affects Public website (tier High); CVSS 8.2
-CVE-2021-22901,Public website,High,8.1,0.10005,True,False,EPSS 0.100 is above the 0.005 threshold; affects Public website (tier High); CVSS 8.1
-CVE-2021-44223,Public website,High,8.1,0.00708,True,False,EPSS 0.007 is above the 0.005 threshold; affects Public website (tier High); CVSS 8.1
-CVE-2022-21661,Public website,High,8.0,0.93422,True,False,EPSS 0.934 is above the 0.005 threshold; affects Public website (tier High); CVSS 8.0
-CVE-2022-0492,Donor database,High,7.8,0.09515,True,False,EPSS 0.095 is above the 0.005 threshold; affects Donor database (tier High); CVSS 7.8
-CVE-2022-34918,Donor database,High,7.8,0.00635,True,False,EPSS 0.006 is above the 0.005 threshold; affects Donor database (tier High); CVSS 7.8
-CVE-2022-30522,Public website,High,7.5,0.34766,True,False,EPSS 0.348 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2022-22719,Public website,High,7.5,0.31424,True,False,EPSS 0.314 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2021-4104,Public website,High,7.5,0.12726,True,False,EPSS 0.127 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2021-26690,Public website,High,7.5,0.05223,True,False,EPSS 0.052 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2022-29404,Public website,High,7.5,0.03242,True,False,EPSS 0.032 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2023-27522,Public website,High,7.5,0.01898,True,False,EPSS 0.019 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2023-2156,Donor database,High,7.5,0.01289,True,False,EPSS 0.013 is above the 0.005 threshold; affects Donor database (tier High); CVSS 7.5
-CVE-2023-31122,Public website,High,7.5,0.01014,True,False,EPSS 0.010 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2022-36946,Donor database,High,7.5,0.00897,True,False,EPSS 0.009 is above the 0.005 threshold; affects Donor database (tier High); CVSS 7.5
-CVE-2021-41524,Public website,High,7.5,0.00871,True,False,EPSS 0.009 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2021-23840,Public website,High,7.5,0.00848,True,False,EPSS 0.008 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2022-31626,Public website,High,7.5,0.00792,True,False,EPSS 0.008 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2021-22883,Public website,High,7.5,0.00646,True,False,EPSS 0.006 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2022-26377,Public website,High,7.5,0.00638,True,False,EPSS 0.006 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2020-13950,Public website,High,7.5,0.00619,True,False,EPSS 0.006 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2021-36222,Public website,High,7.5,0.00616,True,False,EPSS 0.006 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2021-22884,Public website,High,7.5,0.00545,True,False,EPSS 0.005 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2021-34798,Public website,High,7.5,0.00543,True,False,EPSS 0.005 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.5
-CVE-2020-25672,Donor database,High,7.5,0.00518,True,False,EPSS 0.005 is above the 0.005 threshold; affects Donor database (tier High); CVSS 7.5
-CVE-2022-1292,Public website,High,7.3,0.10649,True,False,EPSS 0.106 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.3
-CVE-2021-29447,Public website,High,7.1,0.01173,True,False,EPSS 0.012 is above the 0.005 threshold; affects Public website (tier High); CVSS 7.1
-CVE-2022-21724,Donor database,High,7.0,0.0178,True,False,EPSS 0.018 is above the 0.005 threshold; affects Donor database (tier High); CVSS 7.0
-CVE-2021-29450,Public website,High,6.5,0.00656,True,False,EPSS 0.007 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.5
-CVE-2022-31629,Public website,High,6.5,0.0064,True,False,EPSS 0.006 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.5
-CVE-2023-3338,Donor database,High,6.5,0.00627,True,False,EPSS 0.006 is above the 0.005 threshold; affects Donor database (tier High); CVSS 6.5
-CVE-2021-3634,Public website,High,6.5,0.00605,True,False,EPSS 0.006 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.5
-CVE-2021-35592,Public website,High,6.3,0.03545,True,False,EPSS 0.035 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2021-35594,Public website,High,6.3,0.03545,True,False,EPSS 0.035 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2021-35598,Public website,High,6.3,0.03545,True,False,EPSS 0.035 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2021-35621,Public website,High,6.3,0.02809,True,False,EPSS 0.028 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2022-21550,Public website,High,6.3,0.01791,True,False,EPSS 0.018 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2021-35590,Public website,High,6.3,0.01475,True,False,EPSS 0.015 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2021-35593,Public website,High,6.3,0.01475,True,False,EPSS 0.015 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2022-21482,Public website,High,6.3,0.01362,True,False,EPSS 0.014 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2022-21483,Public website,High,6.3,0.01362,True,False,EPSS 0.014 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2022-21489,Public website,High,6.3,0.01362,True,False,EPSS 0.014 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2022-21490,Public website,High,6.3,0.01362,True,False,EPSS 0.014 is above the 0.005 threshold; affects Public website (tier High); CVSS 6.3
-CVE-2021-45105,Public website,High,5.9,0.96625,True,False,EPSS 0.966 is above the 0.005 threshold; affects Public website (tier High); CVSS 5.9
+cve_id,asset_name,tier,cvss,epss,gate,kev_at_cutoff,kev_date_added,exploited_after,reason
+CVE-2022-40684,Firewall,Critical,9.8,0.97392,True,True,2022-10-11,False,listed in CISA KEV (added 2022-10-11); affects Firewall (tier Critical); CVSS 9.8
+CVE-2022-42475,Firewall,Critical,9.8,0.32117,True,True,2022-12-13,False,listed in CISA KEV (added 2022-12-13); affects Firewall (tier Critical); CVSS 9.8
+CVE-2023-27997,Firewall,Critical,9.8,0.13466,True,True,2023-06-13,False,listed in CISA KEV (added 2023-06-13); affects Firewall (tier Critical); CVSS 9.8
+CVE-2024-21410,Mail server,Critical,9.8,0.07383,True,True,2024-02-15,False,listed in CISA KEV (added 2024-02-15); affects Mail server (tier Critical); CVSS 9.8
+CVE-2020-12812,Firewall,Critical,9.8,0.02923,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Firewall (tier Critical); CVSS 9.8
+CVE-2024-21762,Firewall,Critical,9.8,0.01842,True,True,2024-02-09,False,listed in CISA KEV (added 2024-02-09); affects Firewall (tier Critical); CVSS 9.8
+CVE-2021-26855,Mail server,Critical,9.1,0.97497,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Mail server (tier Critical); CVSS 9.1
+CVE-2021-34473,Mail server,Critical,9.1,0.97311,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Mail server (tier Critical); CVSS 9.1
+CVE-2018-13379,Firewall,Critical,9.1,0.97295,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Firewall (tier Critical); CVSS 9.1
+CVE-2018-13382,Firewall,Critical,9.1,0.89131,True,True,2022-01-10,False,listed in CISA KEV (added 2022-01-10); affects Firewall (tier Critical); CVSS 9.1
+CVE-2021-34523,Mail server,Critical,9.0,0.82011,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Mail server (tier Critical); CVSS 9.0
+CVE-2020-0688,Mail server,Critical,8.8,0.97265,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Mail server (tier Critical); CVSS 8.8
+CVE-2022-41040,Mail server,Critical,8.8,0.96549,True,True,2022-09-30,False,listed in CISA KEV (added 2022-09-30); affects Mail server (tier Critical); CVSS 8.8
+CVE-2021-42321,Mail server,Critical,8.8,0.9654,True,True,2021-11-17,False,listed in CISA KEV (added 2021-11-17); affects Mail server (tier Critical); CVSS 8.8
+CVE-2022-41080,Mail server,Critical,8.8,0.02376,True,True,2023-01-10,False,listed in CISA KEV (added 2023-01-10); affects Mail server (tier Critical); CVSS 8.8
+CVE-2020-17144,Mail server,Critical,8.4,0.27838,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Mail server (tier Critical); CVSS 8.4
+CVE-2022-41082,Mail server,Critical,8.0,0.21627,True,True,2022-09-30,False,listed in CISA KEV (added 2022-09-30); affects Mail server (tier Critical); CVSS 8.0
+CVE-2021-27065,Mail server,Critical,7.8,0.96488,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Mail server (tier Critical); CVSS 7.8
+CVE-2017-8540,Mail server,Critical,7.8,0.94875,True,True,2022-03-03,False,listed in CISA KEV (added 2022-03-03); affects Mail server (tier Critical); CVSS 7.8
+CVE-2021-26857,Mail server,Critical,7.8,0.68319,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Mail server (tier Critical); CVSS 7.8
+CVE-2021-26858,Mail server,Critical,7.8,0.22253,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Mail server (tier Critical); CVSS 7.8
+CVE-2018-8581,Mail server,Critical,7.4,0.0287,True,True,2022-03-03,False,listed in CISA KEV (added 2022-03-03); affects Mail server (tier Critical); CVSS 7.4
+CVE-2021-33766,Mail server,Critical,7.3,0.34749,True,True,2022-01-18,False,listed in CISA KEV (added 2022-01-18); affects Mail server (tier Critical); CVSS 7.3
+CVE-2022-41328,Firewall,Critical,6.7,0.06752,True,True,2023-03-14,False,listed in CISA KEV (added 2023-03-14); affects Firewall (tier Critical); CVSS 6.7
+CVE-2021-31207,Mail server,Critical,6.6,0.96746,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Mail server (tier Critical); CVSS 6.6
+CVE-2019-5591,Firewall,Critical,6.5,0.00234,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Firewall (tier Critical); CVSS 6.5
+CVE-2018-13374,Firewall,Critical,4.3,0.02334,True,True,2022-09-08,False,listed in CISA KEV (added 2022-09-08); affects Firewall (tier Critical); CVSS 4.3
+CVE-2018-13383,Firewall,Critical,4.3,0.00817,True,True,2022-01-10,False,listed in CISA KEV (added 2022-01-10); affects Firewall (tier Critical); CVSS 4.3
+CVE-2021-44168,Firewall,Critical,3.3,0.00146,True,True,2021-12-10,False,listed in CISA KEV (added 2021-12-10); affects Firewall (tier Critical); CVSS 3.3
+CVE-2022-22965,Public website,High,9.8,0.97478,True,True,2022-04-04,False,listed in CISA KEV (added 2022-04-04); affects Public website (tier High); CVSS 9.8
+CVE-2021-41773,Public website,High,9.8,0.97458,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Public website (tier High); CVSS 9.8
+CVE-2022-22963,Public website,High,9.8,0.97442,True,True,2022-08-25,False,listed in CISA KEV (added 2022-08-25); affects Public website (tier High); CVSS 9.8
+CVE-2021-42013,Public website,High,9.8,0.97434,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Public website (tier High); CVSS 9.8
+CVE-2020-1938,Public website,High,9.8,0.97384,True,True,2022-03-03,False,listed in CISA KEV (added 2022-03-03); affects Public website (tier High); CVSS 9.8
+CVE-2020-17530,Public website,High,9.8,0.97257,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Public website (tier High); CVSS 9.8
+CVE-2024-4577,Public website,High,9.8,0.96683,True,True,2024-06-12,False,listed in CISA KEV (added 2024-06-12); affects Public website (tier High); CVSS 9.8
+CVE-2016-8735,Public website,High,9.8,0.7374,True,True,2023-05-12,False,listed in CISA KEV (added 2023-05-12); affects Public website (tier High); CVSS 9.8
+CVE-2021-40438,Public website,High,9.0,0.97057,True,True,2021-12-01,False,listed in CISA KEV (added 2021-12-01); affects Public website (tier High); CVSS 9.0
+CVE-2019-11043,Public website,High,8.7,0.97472,True,True,2022-03-25,False,listed in CISA KEV (added 2022-03-25); affects Public website (tier High); CVSS 8.7
+CVE-2018-11776,Public website,High,8.1,0.97533,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Public website (tier High); CVSS 8.1
+CVE-2017-12617,Public website,High,8.1,0.97501,True,True,2022-03-25,False,listed in CISA KEV (added 2022-03-25); affects Public website (tier High); CVSS 8.1
+CVE-2023-0266,Donor database,High,7.9,0.00098,True,True,2023-03-30,False,listed in CISA KEV (added 2023-03-30); affects Donor database (tier High); CVSS 7.9
+CVE-2019-0211,Public website,High,7.8,0.97397,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects Public website (tier High); CVSS 7.8
+CVE-2022-0847,Donor database,High,7.8,0.07584,True,True,2022-04-25,False,listed in CISA KEV (added 2022-04-25); affects Donor database (tier High); CVSS 7.8
+CVE-2024-1086,Donor database,High,7.8,0.0021,True,True,2024-05-30,False,listed in CISA KEV (added 2024-05-30); affects Donor database (tier High); CVSS 7.8
+CVE-2019-13272,Donor database,High,7.8,0.00052,True,True,2021-12-10,False,listed in CISA KEV (added 2021-12-10); affects Donor database (tier High); CVSS 7.8
+CVE-2021-22600,Donor database,High,6.6,0.00067,True,True,2022-04-11,False,listed in CISA KEV (added 2022-04-11); affects Donor database (tier High); CVSS 6.6
+CVE-2021-0920,Donor database,High,6.4,0.00064,True,True,2022-05-23,False,listed in CISA KEV (added 2022-05-23); affects Donor database (tier High); CVSS 6.4
+CVE-2022-2586,Donor database,High,5.3,0.01048,True,True,2024-06-26,False,listed in CISA KEV (added 2024-06-26); affects Donor database (tier High); CVSS 5.3
+CVE-2020-1350,File server,Medium,10.0,0.94441,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 10.0
+CVE-2018-7445,Office router,Medium,9.8,0.85476,True,True,2022-09-08,False,listed in CISA KEV (added 2022-09-08); affects Office router (tier Medium); CVSS 9.8
+CVE-2018-14847,Office router,Medium,9.1,0.9746,True,True,2021-12-01,False,listed in CISA KEV (added 2021-12-01); affects Office router (tier Medium); CVSS 9.1
+CVE-2021-40444,File server,Medium,8.8,0.96909,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 8.8
+CVE-2021-34527,File server,Medium,8.8,0.96735,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 8.8
+CVE-2020-1020,File server,Medium,8.8,0.9494,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 8.8
+CVE-2022-41128,File server,Medium,8.8,0.53068,True,True,2022-11-08,False,listed in CISA KEV (added 2022-11-08); affects File server (tier Medium); CVSS 8.8
+CVE-2022-26923,File server,Medium,8.8,0.0707,True,True,2022-08-18,False,listed in CISA KEV (added 2022-08-18); affects File server (tier Medium); CVSS 8.8
+CVE-2019-0903,File server,Medium,8.8,0.04151,True,True,2022-03-25,False,listed in CISA KEV (added 2022-03-25); affects File server (tier Medium); CVSS 8.8
+CVE-2023-32049,File server,Medium,8.8,0.0146,True,True,2023-07-11,False,listed in CISA KEV (added 2023-07-11); affects File server (tier Medium); CVSS 8.8
+CVE-2024-30040,File server,Medium,8.8,0.00752,True,True,2024-05-14,False,listed in CISA KEV (added 2024-05-14); affects File server (tier Medium); CVSS 8.8
+CVE-2023-36025,File server,Medium,8.8,0.00457,True,True,2023-11-14,False,listed in CISA KEV (added 2023-11-14); affects File server (tier Medium); CVSS 8.8
+CVE-2023-21674,File server,Medium,8.8,0.00384,True,True,2023-01-10,False,listed in CISA KEV (added 2023-01-10); affects File server (tier Medium); CVSS 8.8
+CVE-2024-29988,File server,Medium,8.8,0.00363,True,True,2024-04-30,False,listed in CISA KEV (added 2024-04-30); affects File server (tier Medium); CVSS 8.8
+CVE-2023-29360,File server,Medium,8.4,0.00297,True,True,2024-02-29,False,listed in CISA KEV (added 2024-02-29); affects File server (tier Medium); CVSS 8.4
+CVE-2020-0601,File server,Medium,8.1,0.9689,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 8.1
+CVE-2022-26925,File server,Medium,8.1,0.89699,True,True,2022-07-01,False,listed in CISA KEV (added 2022-07-01); affects File server (tier Medium); CVSS 8.1
+CVE-2024-21412,File server,Medium,8.1,0.00226,True,True,2024-02-13,False,listed in CISA KEV (added 2024-02-13); affects File server (tier Medium); CVSS 8.1
+CVE-2021-1675,File server,Medium,7.8,0.96568,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 7.8
+CVE-2022-30190,File server,Medium,7.8,0.96079,True,True,2022-06-14,False,listed in CISA KEV (added 2022-06-14); affects File server (tier Medium); CVSS 7.8
+CVE-2020-0938,File server,Medium,7.8,0.95411,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 7.8
+CVE-2018-8453,File server,Medium,7.8,0.93905,True,True,2022-01-21,False,listed in CISA KEV (added 2022-01-21); affects File server (tier Medium); CVSS 7.8
+CVE-2019-1315,File server,Medium,7.8,0.88076,True,True,2022-03-15,False,listed in CISA KEV (added 2022-03-15); affects File server (tier Medium); CVSS 7.8
+CVE-2019-1064,File server,Medium,7.8,0.8793,True,True,2022-03-15,False,listed in CISA KEV (added 2022-03-15); affects File server (tier Medium); CVSS 7.8
+CVE-2019-1129,File server,Medium,7.8,0.87735,True,True,2022-03-15,False,listed in CISA KEV (added 2022-03-15); affects File server (tier Medium); CVSS 7.8
+CVE-2019-1130,File server,Medium,7.8,0.87735,True,True,2022-05-23,False,listed in CISA KEV (added 2022-05-23); affects File server (tier Medium); CVSS 7.8
+CVE-2019-0841,File server,Medium,7.8,0.86552,True,True,2022-03-15,False,listed in CISA KEV (added 2022-03-15); affects File server (tier Medium); CVSS 7.8
+CVE-2023-21823,File server,Medium,7.8,0.65261,True,True,2023-02-14,False,listed in CISA KEV (added 2023-02-14); affects File server (tier Medium); CVSS 7.8
+CVE-2022-34713,File server,Medium,7.8,0.59953,True,True,2022-08-09,False,listed in CISA KEV (added 2022-08-09); affects File server (tier Medium); CVSS 7.8
+CVE-2020-17087,File server,Medium,7.8,0.36533,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 7.8
+CVE-2022-21971,File server,Medium,7.8,0.1931,True,True,2022-08-18,False,listed in CISA KEV (added 2022-08-18); affects File server (tier Medium); CVSS 7.8
+CVE-2020-1464,File server,Medium,7.8,0.12072,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 7.8
+CVE-2019-1388,File server,Medium,7.8,0.09549,True,True,2023-04-07,False,listed in CISA KEV (added 2023-04-07); affects File server (tier Medium); CVSS 7.8
+CVE-2023-36874,File server,Medium,7.8,0.05945,True,True,2023-07-11,False,listed in CISA KEV (added 2023-07-11); affects File server (tier Medium); CVSS 7.8
+CVE-2023-28252,File server,Medium,7.8,0.0257,True,True,2023-04-11,False,listed in CISA KEV (added 2023-04-11); affects File server (tier Medium); CVSS 7.8
+CVE-2024-21338,File server,Medium,7.8,0.01426,True,True,2024-03-04,False,listed in CISA KEV (added 2024-03-04); affects File server (tier Medium); CVSS 7.8
+CVE-2021-34486,File server,Medium,7.8,0.01285,True,True,2022-03-28,False,listed in CISA KEV (added 2022-03-28); affects File server (tier Medium); CVSS 7.8
+CVE-2020-0787,File server,Medium,7.8,0.0109,True,True,2022-01-28,False,listed in CISA KEV (added 2022-01-28); affects File server (tier Medium); CVSS 7.8
+CVE-2021-40450,File server,Medium,7.8,0.01032,True,True,2022-04-25,False,listed in CISA KEV (added 2022-04-25); affects File server (tier Medium); CVSS 7.8
+CVE-2021-34484,File server,Medium,7.8,0.00716,True,True,2022-03-31,False,listed in CISA KEV (added 2022-03-31); affects File server (tier Medium); CVSS 7.8
+CVE-2019-0803,File server,Medium,7.8,0.00615,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 7.8
+CVE-2019-1069,File server,Medium,7.8,0.00417,True,True,2022-03-15,False,listed in CISA KEV (added 2022-03-15); affects File server (tier Medium); CVSS 7.8
+CVE-2022-22718,File server,Medium,7.8,0.00343,True,True,2022-04-19,False,listed in CISA KEV (added 2022-04-19); affects File server (tier Medium); CVSS 7.8
+CVE-2021-1732,File server,Medium,7.8,0.00298,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 7.8
+CVE-2019-1385,File server,Medium,7.8,0.00281,True,True,2022-05-23,False,listed in CISA KEV (added 2022-05-23); affects File server (tier Medium); CVSS 7.8
+CVE-2019-0543,File server,Medium,7.8,0.00235,True,True,2022-03-15,False,listed in CISA KEV (added 2022-03-15); affects File server (tier Medium); CVSS 7.8
+CVE-2019-0863,File server,Medium,7.8,0.00231,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 7.8
+CVE-2022-37969,File server,Medium,7.8,0.00196,True,True,2022-09-14,False,listed in CISA KEV (added 2022-09-14); affects File server (tier Medium); CVSS 7.8
+CVE-2023-32046,File server,Medium,7.8,0.00145,True,True,2023-07-11,False,listed in CISA KEV (added 2023-07-11); affects File server (tier Medium); CVSS 7.8
+CVE-2021-31979,File server,Medium,7.8,0.00109,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 7.8
+CVE-2021-33771,File server,Medium,7.8,0.00109,True,True,2021-11-03,False,listed in CISA KEV (added 2021-11-03); affects File server (tier Medium); CVSS 7.8

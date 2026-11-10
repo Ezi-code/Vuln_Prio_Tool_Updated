@@ -98,7 +98,8 @@ def pick(tab, criterion, target=0.5, budget=0.05):
     if criterion == "coverage":
         ok = tab[tab["coverage"] >= target]
         return ok.loc[ok["threshold"].idxmax()] if len(ok) else tab.iloc[0]
-    return tab[tab["share"] <= budget].iloc[0]
+    ok = tab[tab["share"] <= budget]
+    return ok.iloc[0] if len(ok) else tab.iloc[0]
 
 
 def bootstrap_choice(pool, grid, criterion, target, reps, rng):
@@ -200,6 +201,10 @@ def cmd_derive(a):
         spread = [round(float(x), 5) for x in (med, lo, hi)]
         print(f"  stability: over {a.reps} resamples of the exploited CVEs the chosen threshold had "
               f"median {med:.4f}, 95% range [{lo:.4f}, {hi:.4f}]")
+        if hi - lo > 0.10:
+            print("  WARNING: the 95% range spans more than 0.10. This threshold "
+                  "is not well identified by the available positives; prefer a "
+                  "label-free workload/percentile rule, or pool more periods.")
     try:
         ver = str(pd.read_csv(a.train_data, usecols=["epss_model_version"], nrows=1).iloc[0, 0])
     except (ValueError, IndexError):
@@ -279,8 +284,13 @@ def cmd_evaluate(a):
     print("\nStage 1 alone (global pool, not per organization):")
     print(pd.DataFrame(rows).set_index("method").to_string())
     print("Lift = coverage / share of pool flagged; 1.0x is no better than flagging at random.")
+    print("Note: KEV-at-cutoff CVEs are always flagged operationally but are "
+          "excluded from this table so it measures new exploitation only.")
 
-    flagged = apply_stage1(df[df["epss"].notna()].reset_index(drop=True), thr)
+    # load() fills missing EPSS with 0 and records missingness in has_epss, so
+    # filtering on epss.notna() would silently drop no rows. Keep all rows;
+    # KEV-at-cutoff rows must remain in the operational flag list.
+    flagged = apply_stage1(df.reset_index(drop=True), thr)
     flagged = flagged[flagged["stage1_flag"]]
     Path("results").mkdir(exist_ok=True)
     out = f"results/stage1_flags_{a.cutoff}.csv"

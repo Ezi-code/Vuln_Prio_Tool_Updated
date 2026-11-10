@@ -1,0 +1,50 @@
+{
+  "created": "2026-11-10T07:59:10",
+  "train_data": "data/processed/vulns_train.csv",
+  "train_cutoff": "2023-06-30",
+  "label_horizon_end": "2024-06-30",
+  "config": "model_config.json",
+  "fixed_threshold": 0.04267,
+  "fixed_98th_percentile": 0.1269,
+  "n_inventories": 500,
+  "development_positives": 37,
+  "gate_stats": {
+    "fixed threshold": {
+      "share": 0.07169396472602119,
+      "coverage": 0.1209936507936508
+    },
+    "fixed 98th pct": {
+      "share": 0.04156899089032376,
+      "coverage": 0.06589126984126983
+    },
+    "top 1%": {
+      "share": 0.010277209572264077,
+      "coverage": 0.054034126984126976
+    },
+    "top 2%": {
+      "share": 0.02017071229689376,
+      "coverage": 0.06589126984126983
+    },
+    "top 3%": {
+      "share": 0.030134528508162766,
+      "coverage": 0.06589126984126983
+    },
+    "top 5%": {
+      "share": 0.0501991542066825,
+      "coverage": 0.06589126984126983
+    }
+  },
+  "best_at_primary_n": {
+    "n": 500,
+    "gate": "top 1%",
+    "order": "gate>tier>cvss>epss",
+    "N": 500,
+    "recall": 0.17143809523809522,
+    "ci_lo": 0.08243821428571428,
+    "ci_hi": 0.36218553479371396,
+    "diff_vs_current": 0.09208492063492062,
+    "diff_lo": 0.022519751082251075,
+    "diff_hi": 0.188012728073813
+  },
+  "note": "Development-period comparison only; do not tune on the holdout."
+}

@@ -16,8 +16,23 @@ Usage (venv active, from the project folder):
     python src/baselines.py --cutoff 2024-02-28
 """
 import argparse
+import json
+from pathlib import Path
 
 import pandas as pd
+
+
+def read_meta(path):
+    """Read the optional <data>.meta.json sidecar written by ingest.py."""
+    p = Path(path)
+    for candidate in (p.with_suffix(".meta.json"),
+                      p.with_suffix(p.suffix + ".meta.json")):
+        if candidate.exists():
+            try:
+                return json.loads(candidate.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                return {}
+    return {}
 
 
 def load(path="data/processed/vulns.csv", cutoff=None, horizon_end=None):
@@ -29,6 +44,17 @@ def load(path="data/processed/vulns.csv", cutoff=None, horizon_end=None):
     df = df[~df["description"].fillna("").str.contains("REJECT", case=False)]
 
     cutoff = pd.Timestamp(cutoff)
+    meta = read_meta(path)
+    snap = meta.get("epss_snapshot_date")
+    if snap:
+        try:
+            snap_ts = pd.Timestamp(snap)
+            if snap_ts < cutoff - pd.Timedelta(days=30):
+                print(f"WARNING: EPSS snapshot {snap_ts:%Y-%m-%d} is more than "
+                      f"30 days before the cutoff {cutoff:%Y-%m-%d}. EPSS is a "
+                      f"time-varying score; use a snapshot as of the cutoff.\n")
+        except (TypeError, ValueError):
+            pass
     newest = df["published"].max()
     if newest < cutoff - pd.Timedelta(days=14):
         print(f"WARNING: newest CVE in the data is {newest:%Y-%m-%d}, but the "

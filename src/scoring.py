@@ -12,6 +12,8 @@ Usage (venv active):
     python src/assets.py
     python src/scoring.py --cutoff 2024-06-30
     python src/scoring.py --cutoff 2024-06-30 --epss-threshold 0.088
+    python src/scoring.py --cutoff 2024-06-30 --gate-share 0.02 \
+        --outdir results/optimized
 """
 import argparse
 from pathlib import Path
@@ -21,24 +23,32 @@ import pandas as pd
 from assets import explode_products, load_inventory, match_vulns
 from baselines import (load, rank_cvss_only, rank_epss_kev_only, rank_fifo,
                        recall_at_n)
+from model import gate_cutoff, rank_pool
 
 
 # ----------------------------------------------------------------- model
-def apply_model(pairs, thr):
+def apply_model(pairs, thr, gate_share=None):
     """Rank (CVE, asset) pairs, then keep each CVE once at its most critical
-    asset. Returns one row per CVE, best first."""
-    p = pairs.copy()
-    p["gate"] = p["kev_at_cutoff"] | (p["epss"] >= thr)
-    p = p.sort_values(["gate", "tier_rank", "cvss", "epss"],
-                      ascending=[False, False, False, False], kind="stable")
-    return p.drop_duplicates("cve_id").reset_index(drop=True)
+    asset. Returns one row per CVE, best first.
+
+    KEV-at-cutoff CVEs are kept in the operational ranking and placed first;
+    the evaluation functions below use the Pool B subset (no known KEV) so the
+    metrics measure new exploitation rather than already-known threats.
+    """
+    ranked = rank_pool(pairs, thr, None, gate_share=gate_share,
+                       kev_first=True)
+    return ranked.drop_duplicates("cve_id").reset_index(drop=True)
 
 
-def explain(r, thr):
+def explain(r, thr, gate_share=None):
     if r["kev_at_cutoff"]:
         why = f"listed in CISA KEV (added {r['kev_date_added']:%Y-%m-%d})"
     elif r["gate"]:
-        why = f"EPSS {r['epss']:.3f} is above the {thr} threshold"
+        if gate_share is not None:
+            why = (f"EPSS {r['epss']:.3f} is in the top {gate_share:.1%} "
+                   f"of this inventory")
+        else:
+            why = f"EPSS {r['epss']:.3f} is above the {thr} threshold"
     else:
         why = "not in KEV and EPSS below threshold (deprioritized)"
     return (f"{why}; affects {r['asset_name']} (tier {r['tier']}); "
@@ -50,11 +60,11 @@ def cve_level(pairs):
     return pairs.drop_duplicates("cve_id").reset_index(drop=True)
 
 
-def recall_table(pairs, thr, ns):
+def recall_table(pairs, thr, ns, gate_share=None):
     cves = cve_level(pairs)
     total = int(cves["exploited_after"].sum())
     ranked = {
-        "Model": apply_model(pairs, thr),
+        "Model": apply_model(pairs, thr, gate_share=gate_share),
         "CVSS-only": rank_cvss_only(cves),
         "EPSS/KEV-only": rank_epss_kev_only(cves),
         "FIFO": rank_fifo(cves),
@@ -68,10 +78,11 @@ def recall_table(pairs, thr, ns):
     return pd.DataFrame(rows).set_index("strategy").round(3), ranked["Model"], total
 
 
-def urgent_table(pairs, thr):
+def urgent_table(pairs, thr, gate_share=None):
     cves = cve_level(pairs)
     total = int(cves["exploited_after"].sum())
-    gate = cves["kev_at_cutoff"] | (cves["epss"] >= thr)
+    cutoff = gate_cutoff(cves, thr, gate_share)
+    gate = cves["kev_at_cutoff"] | (cves["epss"] >= cutoff)
     sets = {"Model urgent set (Stage 1 gate)": gate,
             "CVSS >= 7.0": cves["cvss"] >= 7.0,
             "Patch everything": pd.Series(True, index=cves.index)}
@@ -91,7 +102,12 @@ def run(df, args):
     if not inv_files:
         raise SystemExit("No inventories found. Run: python src/assets.py")
     ns = tuple(int(x) for x in args.ns.split(","))
-    Path("results").mkdir(exist_ok=True)
+    outdir = Path(args.outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
+    gate_share = getattr(args, "gate_share", None)
+    gate_label = (f"top {gate_share:.1%} of each inventory's EPSS"
+                  if gate_share is not None
+                  else f"EPSS threshold {args.epss_threshold}")
     pd.set_option("display.width", 200)
 
     for f in inv_files:
@@ -101,25 +117,38 @@ def run(df, args):
         if pairs.empty:
             print("  no matching CVEs")
             continue
-        # Pool B only: CVEs already in KEV at the cutoff are known threats
+
+        # Operational ranking: known KEV first, then the model's order.
+        operational = apply_model(pairs, args.epss_threshold,
+                                  gate_share=gate_share)
+        top = operational.head(100).copy()
+        top["reason"] = top.apply(
+            lambda r: explain(r, args.epss_threshold, gate_share), axis=1)
+        cols = ["cve_id", "asset_name", "tier", "cvss", "epss", "gate",
+                "kev_at_cutoff", "exploited_after", "reason"]
+        if "kev_date_added" in top.columns:
+            cols.insert(7, "kev_date_added")
+        out = outdir / f"ranked_{f.stem}.csv"
+        top[cols].to_csv(out, index=False)
+        n_kev = int(operational["kev_at_cutoff"].sum())
+        print(f"  operational top-100 written to {out} "
+              f"({n_kev} KEV-at-cutoff CVEs in this inventory; ranked first)")
+
+        # Evaluation pool B: CVEs not already in KEV at the cutoff.
         pool = pairs[~pairs["kev_at_cutoff"]].copy()
         n_cve, pos = pool["cve_id"].nunique(), \
             int(cve_level(pool)["exploited_after"].sum())
         print(f"  pool (excl. KEV-at-cutoff): {n_cve} CVEs, {pos} exploited "
-              f"after cutoff, EPSS threshold {args.epss_threshold}")
+              f"after cutoff, gate = {gate_label}")
         if pos == 0:
-            print("  no positives in this pool, skipping")
+            print("  no positives in this pool; metrics skipped")
             continue
-        table, model_rank, _ = recall_table(pool, args.epss_threshold, ns)
+        table, _, _ = recall_table(pool, args.epss_threshold, ns,
+                                   gate_share=gate_share)
         print("\n  Recall@N (CVE level)"); print(table.to_string())
         print("\n  Urgent-set size and coverage")
-        print(urgent_table(pool, args.epss_threshold).to_string())
-
-        top = model_rank.head(100).copy()
-        top["reason"] = top.apply(lambda r: explain(r, args.epss_threshold), axis=1)
-        top[["cve_id", "asset_name", "tier", "cvss", "epss", "gate",
-             "exploited_after", "reason"]].to_csv(
-            f"results/ranked_{f.stem}.csv", index=False)
+        print(urgent_table(pool, args.epss_threshold,
+                           gate_share=gate_share).to_string())
 
     if args.sweep:
         print("\n######## EPSS threshold sensitivity (all inventories pooled) ########")
@@ -146,10 +175,18 @@ def main():
                     help="Only count KEV additions up to this date (YYYY-MM-DD)")
     ap.add_argument("--inventories", default="data/inventories")
     ap.add_argument("--epss-threshold", type=float, default=0.088)
+    ap.add_argument("--gate-share", type=float, default=None,
+                    help="Label-free alternative to --epss-threshold: gate the "
+                         "top share of each inventory's EPSS distribution "
+                         "(e.g. 0.02 = top 2%%).")
     ap.add_argument("--ns", default="25,50,100,250,500")
+    ap.add_argument("--outdir", default="results",
+                    help="Directory for ranked_*.csv outputs")
     ap.add_argument("--sweep", default="0.001,0.005,0.01,0.05,0.088,0.2",
                     help="Comma-separated thresholds ('' to skip)")
     a = ap.parse_args()
+    if a.gate_share is not None and not 0 < a.gate_share < 1:
+        raise SystemExit("--gate-share must be between 0 and 1 (e.g. 0.02)")
     df = load(a.data, a.cutoff, a.horizon_end)
     df["products"] = df["products"].fillna("")
     run(df, a)

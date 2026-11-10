@@ -7,7 +7,7 @@ Usage (from the project folder, with the venv active):
 Optional: set an NVD API key for faster downloads (PowerShell):
     $env:NVD_API_KEY = "your-key-here"
 
-Output: data/processed/vulns.csv
+Output: data/processed/vulns.csv plus vulns.csv.meta.json (provenance)
 """
 import argparse
 import gzip
@@ -57,6 +57,7 @@ def download_epss(date=None):
     df = pd.read_csv(io.StringIO(text), skiprows=1)
     df.columns = ["cve_id", "epss", "epss_percentile"]
     df["epss_model_version"] = version
+    df["epss_snapshot_date"] = date or datetime.now().strftime("%Y-%m-%d")
     return df
 
 
@@ -197,7 +198,19 @@ def main():
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out, index=False)
+    meta = {
+        "created": datetime.now().isoformat(timespec="seconds"),
+        "start": a.start, "end": a.end,
+        "epss_snapshot_date": str(epss["epss_snapshot_date"].iloc[0]),
+        "epss_model_version": str(epss["epss_model_version"].iloc[0]),
+        "kev_rows": int(len(kev)), "nvd_rows": int(len(nvd)),
+        "output_rows": int(len(df)),
+        "sources": ["NVD 2.0", "EPSS", "CISA KEV"],
+    }
+    meta_path = out.with_suffix(out.suffix + ".meta.json")
+    meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
     print(f"Saved {len(df)} rows to {out}")
+    print(f"Metadata written to {meta_path}")
     print(df[["cvss", "epss", "in_kev"]].describe(include="all"))
 
 

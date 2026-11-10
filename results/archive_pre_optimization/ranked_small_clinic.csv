@@ -1,0 +1,101 @@
+cve_id,asset_name,tier,cvss,epss,gate,exploited_after,reason
+CVE-2021-3060,VPN gateway,Critical,8.1,0.00546,True,False,EPSS 0.005 is above the 0.005 threshold; affects VPN gateway (tier Critical); CVSS 8.1
+CVE-2021-28476,Imaging workstation,High,9.9,0.15529,True,False,EPSS 0.155 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.9
+CVE-2021-26867,Imaging workstation,High,9.9,0.02528,True,False,EPSS 0.025 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.9
+CVE-2021-26424,Imaging workstation,High,9.9,0.02183,True,False,EPSS 0.022 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.9
+CVE-2023-21554,Patient records server,High,9.8,0.95084,True,False,EPSS 0.951 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-26937,Patient records server,High,9.8,0.82601,True,False,EPSS 0.826 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-21907,Imaging workstation,High,9.8,0.78331,True,False,EPSS 0.783 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.8
+CVE-2023-36028,Patient records server,High,9.8,0.57012,True,False,EPSS 0.570 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-24941,Patient records server,High,9.8,0.52904,True,False,EPSS 0.529 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-35744,Patient records server,High,9.8,0.46766,True,False,EPSS 0.468 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-21689,Patient records server,High,9.8,0.34386,True,False,EPSS 0.344 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-21690,Patient records server,High,9.8,0.34386,True,False,EPSS 0.344 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-21692,Patient records server,High,9.8,0.34386,True,False,EPSS 0.344 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-34718,Patient records server,High,9.8,0.2351,True,False,EPSS 0.235 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-29363,Patient records server,High,9.8,0.09512,True,False,EPSS 0.095 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-32057,Patient records server,High,9.8,0.04412,True,False,EPSS 0.044 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-35366,Patient records server,High,9.8,0.04412,True,False,EPSS 0.044 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2021-26432,Imaging workstation,High,9.8,0.04224,True,False,EPSS 0.042 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.8
+CVE-2021-24074,Imaging workstation,High,9.8,0.04176,True,False,EPSS 0.042 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.8
+CVE-2021-24077,Imaging workstation,High,9.8,0.04176,True,False,EPSS 0.042 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.8
+CVE-2021-24094,Imaging workstation,High,9.8,0.04176,True,False,EPSS 0.042 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.8
+CVE-2023-24943,Patient records server,High,9.8,0.03775,True,False,EPSS 0.038 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-21849,Imaging workstation,High,9.8,0.02872,True,False,EPSS 0.029 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.8
+CVE-2023-32014,Patient records server,High,9.8,0.02758,True,False,EPSS 0.028 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-28250,Patient records server,High,9.8,0.02466,True,False,EPSS 0.025 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-35365,Patient records server,High,9.8,0.02255,True,False,EPSS 0.023 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-35367,Patient records server,High,9.8,0.02255,True,False,EPSS 0.023 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-24491,Patient records server,High,9.8,0.02246,True,False,EPSS 0.022 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-24497,Patient records server,High,9.8,0.02246,True,False,EPSS 0.022 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-26809,Patient records server,High,9.8,0.02246,True,False,EPSS 0.022 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-23415,Patient records server,High,9.8,0.0203,True,False,EPSS 0.020 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-32015,Patient records server,High,9.8,0.01888,True,False,EPSS 0.019 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-36397,Patient records server,High,9.8,0.01816,True,False,EPSS 0.018 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2021-43215,Imaging workstation,High,9.8,0.01782,True,False,EPSS 0.018 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.8
+CVE-2022-29130,Patient records server,High,9.8,0.01735,True,False,EPSS 0.017 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-22012,Imaging workstation,High,9.8,0.01735,True,False,EPSS 0.017 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.8
+CVE-2022-34715,Patient records server,High,9.8,0.01624,True,False,EPSS 0.016 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-30133,Patient records server,High,9.8,0.01213,True,False,EPSS 0.012 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-21708,Patient records server,High,9.8,0.01093,True,False,EPSS 0.011 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-23392,Patient records server,High,9.8,0.01093,True,False,EPSS 0.011 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-21803,Imaging workstation,High,9.8,0.01093,True,False,EPSS 0.011 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 9.8
+CVE-2022-34721,Patient records server,High,9.8,0.01063,True,False,EPSS 0.011 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-34722,Patient records server,High,9.8,0.01063,True,False,EPSS 0.011 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-35385,Patient records server,High,9.8,0.01051,True,False,EPSS 0.011 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-36910,Patient records server,High,9.8,0.01051,True,False,EPSS 0.011 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-36911,Patient records server,High,9.8,0.01051,True,False,EPSS 0.011 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2023-35349,Patient records server,High,9.8,0.00605,True,False,EPSS 0.006 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 9.8
+CVE-2022-30216,Patient records server,High,8.8,0.70197,True,False,EPSS 0.702 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2021-24093,Imaging workstation,High,8.8,0.15803,True,False,EPSS 0.158 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2023-32038,Patient records server,High,8.8,0.14668,True,False,EPSS 0.147 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-28231,Patient records server,High,8.8,0.07384,True,False,EPSS 0.074 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-36577,Patient records server,High,8.8,0.06122,True,False,EPSS 0.061 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2022-21850,Imaging workstation,High,8.8,0.05564,True,False,EPSS 0.056 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2022-21851,Imaging workstation,High,8.8,0.05564,True,False,EPSS 0.056 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2021-33749,Imaging workstation,High,8.8,0.05488,True,False,EPSS 0.055 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2021-33750,Imaging workstation,High,8.8,0.05488,True,False,EPSS 0.055 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2021-33752,Imaging workstation,High,8.8,0.05488,True,False,EPSS 0.055 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2021-33756,Imaging workstation,High,8.8,0.05488,True,False,EPSS 0.055 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2021-38666,Patient records server,High,8.8,0.05252,True,False,EPSS 0.053 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2021-34535,Imaging workstation,High,8.8,0.05216,True,False,EPSS 0.052 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2021-26876,Imaging workstation,High,8.8,0.05018,True,False,EPSS 0.050 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2023-36402,Patient records server,High,8.8,0.04976,True,False,EPSS 0.050 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-24886,Patient records server,High,8.8,0.04239,True,False,EPSS 0.042 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-35302,Patient records server,High,8.8,0.03577,True,False,EPSS 0.036 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-35639,Patient records server,High,8.8,0.03323,True,False,EPSS 0.033 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-36006,Patient records server,High,8.8,0.03323,True,False,EPSS 0.033 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-24884,Patient records server,High,8.8,0.03113,True,False,EPSS 0.031 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-24887,Patient records server,High,8.8,0.03113,True,False,EPSS 0.031 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-24927,Patient records server,High,8.8,0.03113,True,False,EPSS 0.031 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-24929,Patient records server,High,8.8,0.03113,True,False,EPSS 0.031 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-28243,Patient records server,High,8.8,0.03113,True,False,EPSS 0.031 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2022-21990,Imaging workstation,High,8.8,0.03084,True,False,EPSS 0.031 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2022-23285,Imaging workstation,High,8.8,0.03084,True,False,EPSS 0.031 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2023-29362,Patient records server,High,8.8,0.03001,True,False,EPSS 0.030 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-29372,Patient records server,High,8.8,0.02903,True,False,EPSS 0.029 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-29373,Patient records server,High,8.8,0.02879,True,False,EPSS 0.029 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-35303,Patient records server,High,8.8,0.02846,True,False,EPSS 0.028 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-35381,Patient records server,High,8.8,0.0262,True,False,EPSS 0.026 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-36882,Patient records server,High,8.8,0.0262,True,False,EPSS 0.026 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-38169,Patient records server,High,8.8,0.0262,True,False,EPSS 0.026 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-24885,Patient records server,High,8.8,0.02584,True,False,EPSS 0.026 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2022-22017,Patient records server,High,8.8,0.02463,True,False,EPSS 0.025 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2022-29139,Patient records server,High,8.8,0.02463,True,False,EPSS 0.025 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2022-22019,Imaging workstation,High,8.8,0.02463,True,False,EPSS 0.025 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2022-24492,Patient records server,High,8.8,0.02387,True,False,EPSS 0.024 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2022-24500,Patient records server,High,8.8,0.02387,True,False,EPSS 0.024 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2022-24528,Patient records server,High,8.8,0.02387,True,False,EPSS 0.024 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2022-24541,Patient records server,High,8.8,0.02387,True,False,EPSS 0.024 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-24928,Patient records server,High,8.8,0.02245,True,False,EPSS 0.022 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2022-26927,Imaging workstation,High,8.8,0.02014,True,False,EPSS 0.020 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2023-21686,Patient records server,High,8.8,0.01938,True,False,EPSS 0.019 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-21797,Patient records server,High,8.8,0.01938,True,False,EPSS 0.019 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-21798,Patient records server,High,8.8,0.01938,True,False,EPSS 0.019 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-21799,Patient records server,High,8.8,0.01938,True,False,EPSS 0.019 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-28275,Patient records server,High,8.8,0.01938,True,False,EPSS 0.019 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2023-21727,Patient records server,High,8.8,0.0186,True,False,EPSS 0.019 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2021-36965,Patient records server,High,8.8,0.01752,True,False,EPSS 0.018 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2022-35841,Patient records server,High,8.8,0.01739,True,False,EPSS 0.017 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8
+CVE-2021-24088,Imaging workstation,High,8.8,0.01716,True,False,EPSS 0.017 is above the 0.005 threshold; affects Imaging workstation (tier High); CVSS 8.8
+CVE-2022-30153,Patient records server,High,8.8,0.0171,True,False,EPSS 0.017 is above the 0.005 threshold; affects Patient records server (tier High); CVSS 8.8

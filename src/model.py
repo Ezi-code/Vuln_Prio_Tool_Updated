@@ -14,18 +14,52 @@ lam=float -> weighted variant for the sensitivity analysis of section 5.6:
              score = lam * tier/3 + CVSS/10. lam=0 ignores criticality; for
              lam >= 3 a one-tier step outweighs the whole CVSS range, which
              is the same ordering as strict tiers.
+
+gate_share : optional, label-free alternative to a fixed EPSS threshold. The
+             gate is the top `gate_share` of THIS pool's EPSS distribution
+             (e.g. 0.02 for the top 2%). KEV members always pass. This adapts
+             to each organization's list and to EPSS snapshot changes, so the
+             same rule can be applied to a later evaluation period. It does
+             not use the outcome labels.
+kev_first  : operational option. Put CVEs already in KEV at the cutoff above
+             all EPSS-only-gated CVEs. Evaluation pools exclude KEV at the
+             cutoff, so this has no effect on the holdout metrics.
 """
 import pandas as pd
 
 TIER_MAX = 3
 
 
-def rank_pool(pool, thr, lam=None):
+def gate_cutoff(pool, thr=None, gate_share=None):
+    """Return the EPSS cutoff used by the Stage 1 gate.
+
+    Pass one of:
+      thr         fixed EPSS threshold (the original design)
+      gate_share  top share of this pool's EPSS distribution, e.g. 0.02
+    If both are supplied, gate_share wins.
+    """
+    if gate_share is not None:
+        if not 0 < gate_share < 1:
+            raise ValueError("gate_share must be between 0 and 1")
+        return float(pool["epss"].quantile(1.0 - gate_share))
+    if thr is None:
+        raise ValueError("pass either thr or gate_share")
+    return float(thr)
+
+
+def rank_pool(pool, thr=None, lam=None, gate_share=None, kev_first=False):
     """Return the pool ordered best-first. Needs columns: kev_at_cutoff, epss,
-    cvss, tier_rank."""
-    p = pool.assign(gate=pool["kev_at_cutoff"] | (pool["epss"] >= thr))
+    cvss, tier_rank.
+
+    The gate is either a fixed EPSS threshold (`thr`) or the top
+    `gate_share` of this pool's EPSS distribution; see `gate_cutoff`.
+    """
+    cutoff = gate_cutoff(pool, thr, gate_share)
+    p = pool.assign(gate=pool["kev_at_cutoff"] | (pool["epss"] >= cutoff))
+    keys = ["gate"] + (["kev_at_cutoff"] if kev_first else [])
     if lam is None:
-        return p.sort_values(["gate", "tier_rank", "cvss", "epss"],
-                             ascending=False, kind="stable")
+        keys += ["tier_rank", "cvss", "epss"]
+        return p.sort_values(keys, ascending=False, kind="stable")
     p["score"] = lam * p["tier_rank"] / TIER_MAX + p["cvss"] / 10.0
-    return p.sort_values(["gate", "score", "epss"], ascending=False, kind="stable")
+    keys += ["score", "epss"]
+    return p.sort_values(keys, ascending=False, kind="stable")

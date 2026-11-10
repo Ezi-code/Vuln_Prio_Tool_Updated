@@ -234,5 +234,9 @@ The results depend on the quality and availability of vulnerability intelligence
 
 This repository supports academic research into vulnerability prioritisation for resource-constrained organisations, with an emphasis on comparing integrated risk-based approaches against simpler prioritisation strategies.
 
+## Optimization workflow
+
+The frozen design remains in `model_config.json` and `stage1_config.json`. The implemented candidate tools, development-period comparison, data-provenance checks, and commands are documented in [`docs/OPTIMIZATION.md`](docs/OPTIMIZATION.md).
+
 
 
