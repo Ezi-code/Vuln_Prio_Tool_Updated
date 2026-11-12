@@ -268,9 +268,17 @@ uv run --with pandas --with numpy python src/evaluate_model.py \
 `src/scoring.py` now writes:
 
 - `ranked_<inventory>.csv` with `asset_tier`, `criticality_score`,
-  `priority_queue`, and `reason`;
+  `priority_queue`, `needs_fixing`, `exploit_status`, `fix_action`, and
+  `reason`;
 - `tier_<inventory>_<tier>.csv` for each of the four queues;
+- `exploits_by_tier_<inventory>.csv`, a per-tier summary of known-exploited
+  and EPSS-gated CVEs;
+- `asset_exploits_<inventory>.csv`, one row per (asset, CVE) that needs action;
+- `exploit_report_<inventory>.md`, the readable tier -> asset -> CVE report;
 - a printed tier summary with later-exploited counts.
+
+`needs_fixing` is based on CISA KEV at the cutoff or the EPSS candidate gate,
+not on the after-cutoff evaluation label.
 
 The old top-2% headline is retained only as the capacity-constrained case. Do
 not compare its coverage with a 10% final list without labelling both sizes.

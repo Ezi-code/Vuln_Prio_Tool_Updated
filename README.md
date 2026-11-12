@@ -129,6 +129,20 @@ list. `--gate-share` optionally replaces the fixed Stage 1 threshold with a
 per-inventory top-*q*% gate; use it only as a clearly labelled sensitivity
 analysis.
 
+The same command writes three exploit-focused outputs per inventory:
+
+- `exploits_by_tier_<inventory>.csv` — one row per asset tier, with counts of
+  known-exploited CVEs, EPSS-gated CVEs, affected assets, and the top CVEs;
+- `asset_exploits_<inventory>.csv` — one row per (asset, CVE) that needs
+  action, including `asset_tier`, `priority_queue`, `exploit_status`, and
+  `fix_action`;
+- `exploit_report_<inventory>.md` — a readable report grouped by asset tier and
+  then by individual asset.
+
+`needs_fixing` is true when a CVE is in CISA KEV at the cutoff or passes the
+EPSS candidate gate. The after-cutoff evaluation label is not used for the
+operational fix decision.
+
 Validate the data and write a manifest:
 
 ```bash

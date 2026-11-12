@@ -43,6 +43,33 @@ def add_priority_fields(ranked):
     return out
 
 
+def add_exploit_fields(ranked):
+    """Add a plain-language exploit status and an explicit fix flag.
+
+    ``needs_fixing`` means the CVE is either known-exploited at the cutoff
+    (CISA KEV) or passed the EPSS candidate gate.  It does not use the
+    after-cutoff evaluation label.  The final capacity may still contain
+    below-gate rows, which are marked for monitoring rather than fixing.
+    """
+    out = ranked.copy()
+    kev = out["kev_at_cutoff"].fillna(False).astype(bool)
+    gate = out["gate"].fillna(False).astype(bool)
+    out["needs_fixing"] = kev | gate
+    out["exploit_status"] = [
+        "Known exploited (CISA KEV at cutoff)" if k
+        else "High exploitation likelihood (EPSS gate)" if g
+        else "Below gate (monitor)"
+        for k, g in zip(kev, gate)
+    ]
+    out["fix_action"] = [
+        "Fix immediately (known exploited)" if k
+        else "Patch by asset-tier queue" if g
+        else "Monitor / backlog"
+        for k, g in zip(kev, gate)
+    ]
+    return out
+
+
 def apply_model(pairs, thr, gate_share=None, capacity=None):
     """Rank (CVE, asset) pairs, then keep each CVE once at its most critical
     asset. Returns one row per CVE, best first.
@@ -58,6 +85,7 @@ def apply_model(pairs, thr, gate_share=None, capacity=None):
                        kev_first=True)
     ranked = ranked.drop_duplicates("cve_id").reset_index(drop=True)
     ranked = add_priority_fields(ranked)
+    ranked = add_exploit_fields(ranked)
     if capacity is not None:
         ranked = ranked.head(capacity).reset_index(drop=True)
     return ranked
@@ -148,14 +176,108 @@ def tier_summary(ranked, top_n=None):
             "% of ranked": round(100 * len(sub) / total, 1) if total else 0.0,
             f"in top {top_n}": int((shown["asset_tier"] == tier).sum())
             if top_n is not None else int(len(sub)),
-            "later_exploited": int(sub["exploited_after"].sum())
-            if "exploited_after" in sub.columns else 0,
             "unpatchable": int((sub["patchable"] == "no").sum())
             if "patchable" in sub.columns else 0,
             "mean_cvss": round(float(sub["cvss"].mean()), 2) if len(sub) else float("nan"),
             "mean_epss": round(float(sub["epss"].mean()), 4) if len(sub) else float("nan"),
         })
     return pd.DataFrame(rows).set_index("asset_tier")
+
+
+def tier_exploit_summary(ranked, examples=5):
+    """One row per asset tier: how many exploits need action and which ones.
+
+    This is the concise answer to "what needs fixing in each tier?".  It uses
+    only information available at the cutoff: CISA KEV membership and the EPSS
+    gate.  The after-cutoff label is not used.
+    """
+    rows = []
+    for tier in TIERS:
+        sub = ranked[ranked["asset_tier"] == tier]
+        actionable = sub[sub["needs_fixing"]]
+        kev = actionable[actionable["kev_at_cutoff"]]
+        gated = actionable[actionable["gate"] & ~actionable["kev_at_cutoff"]]
+        rows.append({
+            "asset_tier": tier,
+            "priority_queue": QUEUE_BY_TIER[tier],
+            "cves_in_final": int(len(sub)),
+            "known_exploited": int(len(kev)),
+            "epss_gated_only": int(len(gated)),
+            "needs_fixing": int(len(actionable)),
+            "assets_affected": int(actionable["asset_id"].nunique()),
+            "unpatchable": int((actionable["patchable"] == "no").sum())
+            if "patchable" in actionable.columns else 0,
+            "top_cves": "; ".join(actionable["cve_id"].head(examples).astype(str)),
+            "top_assets": "; ".join(
+                actionable["asset_name"].drop_duplicates().head(examples).astype(str)
+            ),
+        })
+    return pd.DataFrame(rows).set_index("asset_tier")
+
+
+def asset_exploit_list(ranked):
+    """One row per (asset, CVE) that needs action, grouped by asset tier.
+
+    The output is deliberately asset-centric: a practitioner can hand the
+    Critical rows to the owner of each affected system.
+    """
+    from assets import OPTIONAL_COLUMNS  # local import keeps module startup small
+
+    cols = ["asset_id", "asset_name", "asset_tier", "criticality_score",
+            "priority_queue", "patchable", "owner", "maintenance_window",
+            "compensating_control", "cve_id", "matched_product",
+            "exploit_status", "fix_action", "cvss", "epss",
+            "kev_date_added", "reason"]
+    if ranked.empty:
+        return pd.DataFrame(columns=cols)
+    out = ranked.loc[ranked["needs_fixing"]].copy()
+    out = out.sort_values(["tier_rank", "asset_id"],
+                          ascending=[False, True], kind="stable")
+    cols = [c for c in cols if c in out.columns]
+    cols += [c for c in OPTIONAL_COLUMNS if c in out.columns and c not in cols]
+    return out[cols].reset_index(drop=True)
+
+
+def exploit_report_markdown(ranked, inventory_name, per_asset=10):
+    """Human-readable report: tier -> asset -> CVE -> why it needs action."""
+    lines = [
+        f"# Exploit priorities: {inventory_name}",
+        "",
+        "Generated from CISA KEV at the cutoff plus the EPSS candidate gate.",
+        "The after-cutoff evaluation label is not used in this operational report.",
+        "",
+    ]
+    for tier in reversed(TIERS):  # Critical first
+        sub = ranked[(ranked["asset_tier"] == tier) & ranked["needs_fixing"]]
+        lines.append(f"## {tier} — {QUEUE_BY_TIER[tier]}")
+        if sub.empty:
+            lines.append("")
+            lines.append("No CVEs need action in this tier within the final list.")
+            lines.append("")
+            continue
+        lines.append("")
+        lines.append(f"{len(sub)} CVE(s) across {sub['asset_id'].nunique()} asset(s).")
+        lines.append("")
+        for asset_id, group in sub.groupby("asset_id", sort=False):
+            row0 = group.iloc[0]
+            patch = str(row0.get("patchable", "") or "unknown")
+            owner = str(row0.get("owner", "") or "unassigned")
+            lines.append(f"### {row0['asset_name']} ({asset_id}) — {tier}")
+            lines.append(f"Owner: {owner}; patchable: {patch}. "
+                         f"Criticality: {row0['criticality_score']}/12.")
+            lines.append("")
+            for _, r in group.head(per_asset).iterrows():
+                lines.append(
+                    f"- **{r['cve_id']}** — {r['exploit_status']}; "
+                    f"CVSS {r['cvss']:.1f}, EPSS {r['epss']:.3f}. "
+                    f"{r.get('reason', '')}"
+                )
+            if len(group) > per_asset:
+                lines.append(
+                    f"- ... {len(group) - per_asset} more CVE(s) in the CSV."
+                )
+            lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def tier_outputs(ranked, outdir, stem, columns, per_tier=100):
@@ -202,8 +324,9 @@ def run(df, args):
         top = operational.head(top_n).copy()
         cols = ["cve_id", "asset_id", "asset_name", "matched_product",
                 "asset_tier", "criticality_score", "priority_queue",
+                "needs_fixing", "exploit_status", "fix_action",
                 "tier_rank", "cvss", "epss", "gate", "kev_at_cutoff",
-                "kev_date_added", "exploited_after", "owner", "patchable",
+                "kev_date_added", "owner", "patchable",
                 "maintenance_window", "compensating_control", "reason"]
         cols = [c for c in cols if c in top.columns]
         out = outdir / f"ranked_{f.stem}.csv"
@@ -220,6 +343,26 @@ def run(df, args):
         if tier_paths:
             print("  tier queues: " + ", ".join(
                 f"{t}={p.name}" for t, p in tier_paths.items()))
+
+        # Explicit answer to "what needs fixing in each tier?" and "which
+        # exploits affect each asset?".
+        print("\n  Exploits needing action, by asset tier")
+        ex_summary = tier_exploit_summary(operational)
+        print(ex_summary.to_string())
+        ex_path = outdir / f"exploits_by_tier_{f.stem}.csv"
+        ex_summary.to_csv(ex_path)
+        print(f"  tier exploit summary written to {ex_path}")
+
+        asset_list = asset_exploit_list(operational)
+        asset_path = outdir / f"asset_exploits_{f.stem}.csv"
+        asset_list.to_csv(asset_path, index=False)
+        print(f"  per-asset exploit list written to {asset_path} "
+              f"({len(asset_list)} asset/CVE rows)")
+
+        report_path = outdir / f"exploit_report_{f.stem}.md"
+        report_path.write_text(
+            exploit_report_markdown(operational, f.stem), encoding="utf-8")
+        print(f"  human-readable exploit report written to {report_path}")
 
         # Evaluation pool B: CVEs not already in KEV at the cutoff.
         pool = pairs[~pairs["kev_at_cutoff"]].copy()

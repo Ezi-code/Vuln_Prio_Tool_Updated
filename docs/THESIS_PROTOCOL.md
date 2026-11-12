@@ -64,6 +64,13 @@ the displayed operational list is a different size.
   Labels are KEV additions after the cutoff and up to the horizon end.
 - **Operational rankings** include KEV-at-cutoff CVEs and place them first. A
   list that omits already-known exploited CVEs is not usable.
+- **Exploit reports** answer "what needs fixing in each asset tier?":
+  `exploits_by_tier_<inventory>.csv` summarises known-exploited and
+  EPSS-gated CVEs per tier, `asset_exploits_<inventory>.csv` gives one row per
+  (asset, CVE) that needs action, and `exploit_report_<inventory>.md` is the
+  human-readable tier -> asset -> CVE report.
+- `needs_fixing` uses only cutoff-time information: CISA KEV at the cutoff or
+  the EPSS candidate gate. It does not use the after-cutoff label.
 - Report operational coverage including KEV-at-cutoff separately from
   new-exploitation coverage. Do not compare a coverage number that includes
   KEV-at-cutoff with one that excludes it without saying so.

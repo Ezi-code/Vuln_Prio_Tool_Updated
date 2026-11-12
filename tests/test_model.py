@@ -4,7 +4,8 @@ import pytest
 
 from assets import tier_from_total
 from model import gate_cutoff, rank_pool
-from scoring import apply_model
+from scoring import (apply_model, asset_exploit_list, exploit_report_markdown,
+                     tier_exploit_summary)
 
 
 def basic_pool():
@@ -122,6 +123,39 @@ def test_apply_model_capacity_is_separate_from_gate():
     out = apply_model(pairs, 0.40, capacity=2)
     assert len(out) == 2
     assert list(out["cve_id"]) == ["C2", "C3"]
+
+
+def test_exploit_status_and_asset_exploit_list():
+    pairs = pd.DataFrame({
+        "cve_id": ["C1", "C2", "C3"],
+        "asset_id": ["A1", "A2", "A3"],
+        "asset_name": ["firewall", "records", "printer"],
+        "criticality_score": [10, 8, 2],
+        "tier": ["Critical", "High", "Low"],
+        "tier_rank": [3, 2, 0],
+        "priority_queue": ["Patch now", "Patch next", "Monitor"],
+        "kev_at_cutoff": [True, False, False],
+        "epss": [0.10, 0.90, 0.10],
+        "cvss": [9.8, 7.0, 5.0],
+    })
+    out = apply_model(pairs, 0.50)
+    assert list(out["needs_fixing"]) == [True, True, False]
+    assert list(out["exploit_status"]) == [
+        "Known exploited (CISA KEV at cutoff)",
+        "High exploitation likelihood (EPSS gate)",
+        "Below gate (monitor)",
+    ]
+    summary = tier_exploit_summary(out)
+    assert summary.loc["Critical", "known_exploited"] == 1
+    assert summary.loc["High", "epss_gated_only"] == 1
+    assert summary.loc["Low", "needs_fixing"] == 0
+    assets = asset_exploit_list(out)
+    assert list(assets["asset_id"]) == ["A1", "A2"]
+    report = exploit_report_markdown(out, "test-inventory")
+    assert "# Exploit priorities: test-inventory" in report
+    assert "## Critical — Patch now" in report
+    assert "C1" in report
+    assert "## Low — Monitor" in report
 
 
 def test_tier_boundaries():
