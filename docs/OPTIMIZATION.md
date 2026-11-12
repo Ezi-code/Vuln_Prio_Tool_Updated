@@ -274,3 +274,32 @@ uv run --with pandas --with numpy python src/evaluate_model.py \
 
 The old top-2% headline is retained only as the capacity-constrained case. Do
 not compare its coverage with a 10% final list without labelling both sizes.
+
+### Criticality evidence on the synthetic-inventory check
+
+The Monte Carlo run below uses 300 generated inventories, the frozen Stage 1
+threshold (`0.04267`), and final-list budgets of 10/20/30%:
+
+```bash
+uv run --with pandas --with numpy python src/montecarlo.py \
+    --cutoff 2024-06-30 --horizon-end 2025-06-30 \
+    --budgets 0.10,0.20,0.30 --n 300 --reps 1000 \
+    --outdir results/thesis_mc
+```
+
+| Metric at 10% | Model | Gate+CVSS (criticality off) | Tier+CVSS (no gate) |
+|---|---:|---:|---:|
+| Recall | 0.216 | 0.200 | 0.210 |
+| Criticality-weighted recall | 0.251 | 0.147 | 0.288 |
+| Share on High/Critical assets | 0.564 | 0.298 | 0.877 |
+
+At 20% the criticality-weighted recall difference is +0.242
+[+0.057, +0.364] for the model over Gate+CVSS; at 30% it is +0.298
+[+0.083, +0.462]. At 10% the interval still includes zero (-0.049 to +0.219),
+so the 10% criticality-weighted advantage is suggestive, not confirmatory.
+The plain recall difference against Gate+CVSS is small and its interval
+includes zero at every budget. The defensible claim is about the tier mix and
+criticality-weighted coverage, not about a large raw-recall gain.
+
+The run is descriptive because the period has already been inspected. The
+confirmatory test is the untouched 2025-06-30 → 2026-06-30 holdout.
