@@ -17,11 +17,21 @@ decisions.
   - Operational output now includes KEV-at-cutoff CVEs and puts them first.
   - `--gate-share` selects the per-inventory percentile gate.
   - `--outdir` lets new output go somewhere other than the existing `results/`.
+  - The four asset tiers are exposed as `asset_tier` plus `priority_queue`,
+    and one CSV is written per tier.
+  - `--capacity` separates the final list size from the Stage 1 candidate gate.
 - `src/evaluate_model.py`
   - `--gate-share` evaluates the percentile-gate candidate.
   - Fixed the `--budgets` by-sector crash (the by-sector table now uses the
     first requested budget).
   - Writes a machine-readable `evaluation_<cutoff>_summary.json`.
+  - Reports the Stage 1 gate, the final 10% list, and per-asset-tier metrics
+    separately.
+- `src/validate_data.py`
+  - New schema, leakage, sidecar, and manifest checks.
+- `src/assets.py`
+  - Required/optional inventory columns, `patchable`, queue labels, and
+    explicit validation.
 - `src/montecarlo.py`
   - `--gate-share` support.
   - Fixed an empty-selection indexing bug that could occur when the top budget
@@ -112,6 +122,12 @@ descriptive output on that period is saved under `results/optimized/`:
 | 5% | 0.177 | 0.095 | 0.080 |
 | 10% | 0.258 | 0.131 | 0.211 |
 
+> Note (Nov 2026): this table is the earlier candidate top-2%-gate run. Under
+> the current frozen Stage 1 threshold with capacity as the final list, the
+> descriptive 2% result is 0.057 (interval includes 0), the 5% result is 0.106,
+> and the 10% result is 0.211. The 2% case is a capacity-constrained secondary
+> analysis, not the headline. See `docs/THESIS_PROTOCOL.md`.
+
 The model's urgent list averaged 224 CVEs, 2.0% of the list, with 0.095
 coverage. These numbers are descriptive only because this period has already
 been inspected. After the candidate is frozen, confirm it once on a new,
@@ -185,3 +201,76 @@ The tracked `results/ranked_*.csv` files have been regenerated with the frozen
 `0.04267` threshold and now include KEV-at-cutoff CVEs. The previous copies are
 in `results/archive_pre_optimization/`. Candidate top-2% outputs are separate,
 under `results/optimized/`.
+
+## Decision update: asset tiers are the priority categories
+
+The four asset-criticality tiers are the final operational priority
+categories: **Critical, High, Medium, Low**. There is no separate
+Critical/Medium/Low threat taxonomy. The implementation exposes the tier as
+`asset_tier` and maps it to a queue label (`Patch now`, `Patch next`,
+`Scheduled`, `Monitor`). A three-label slide can group the four tiers for
+display, but that grouping is not a model change and is not used for the
+metrics.
+
+The Stage 1 gate and the final list are separate:
+
+- Stage 1 produces a **candidate** set.
+- Stage 2 orders candidates by asset tier.
+- Stage 3 orders within tier by CVSS and then EPSS.
+- `--capacity` / the evaluation budget selects the final list.
+
+This matters when the candidate gate is wider than the operational capacity.
+At the 2% capacity the gate and final list can coincide, so Stages 2 and 3
+cannot change membership; that result is a capacity-constrained secondary
+analysis, not the thesis headline.
+
+### Descriptive 10/20/30 result (already-viewed period)
+
+Using the frozen Stage 1 threshold (`0.04267`) and final-list budgets:
+
+| Budget | Model recall | CVSS-only | EPSS/KEV-only |
+|---|---:|---:|---:|
+| 10% | 0.211 | 0.211 | 0.131 |
+| 20% | 0.364 | 0.290 | 0.234 |
+| 30% | 0.508 | 0.408 | 0.304 |
+
+The model and CVSS-only are tied at 10%; the model separates at 20% and 30%.
+The intervals overlap, so this is descriptive, not a confirmatory claim. The
+per-tier table shows the criticality signal: at the 10% final list, recall on
+Critical assets is 0.795, on High 0.208, on Medium 0.099, and on Low 0.239.
+
+### Gate-breadth sensitivity
+
+A deliberately wide candidate gate (top 20% of each inventory's EPSS) plus a
+10% final list gives Model recall 0.180, CVSS-only 0.211, and EPSS/KEV-only
+0.131. The wider gate does not improve the 10% result; it is a stress test of
+the gate/capacity separation, not the primary protocol. The primary protocol
+keeps the frozen Stage 1 rule and applies the 10% capacity.
+
+### Commands
+
+```bash
+# Primary descriptive 10/20/30 protocol
+uv run --with pandas --with numpy python src/evaluate_model.py \
+    --cutoff 2024-06-30 --horizon-end 2025-06-30 \
+    --budgets 0.10,0.20,0.30 --budget 0.10 \
+    --outdir results/thesis_primary
+
+# Gate-breadth sensitivity
+uv run --with pandas --with numpy python src/evaluate_model.py \
+    --cutoff 2024-06-30 --horizon-end 2025-06-30 \
+    --gate-share 0.20 --budgets 0.10,0.20,0.30 --budget 0.10 \
+    --outdir results/thesis_wide_gate
+```
+
+### Operational output
+
+`src/scoring.py` now writes:
+
+- `ranked_<inventory>.csv` with `asset_tier`, `criticality_score`,
+  `priority_queue`, and `reason`;
+- `tier_<inventory>_<tier>.csv` for each of the four queues;
+- a printed tier summary with later-exploited counts.
+
+The old top-2% headline is retained only as the capacity-constrained case. Do
+not compare its coverage with a 10% final list without labelling both sizes.

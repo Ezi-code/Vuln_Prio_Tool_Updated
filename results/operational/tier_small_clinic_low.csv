@@ -1,0 +1,1 @@
+cve_id,asset_id,asset_name,matched_product,asset_tier,criticality_score,priority_queue,tier_rank,cvss,epss,gate,kev_at_cutoff,kev_date_added,exploited_after,owner,patchable,maintenance_window,compensating_control,reason

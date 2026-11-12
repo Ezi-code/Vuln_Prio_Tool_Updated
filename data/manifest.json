@@ -1,0 +1,124 @@
+{
+  "created": "2026-11-12T12:37:15",
+  "data": {
+    "path": "data/processed/vulns.csv",
+    "exists": true,
+    "bytes": 84542497,
+    "sha256": "974367a098287253500a5dbabd7a463a23a24b0d066f790de6377b9c8ca63b51",
+    "meta": {},
+    "rows": 174673
+  },
+  "inventories": {
+    "ngo_office.csv": {
+      "rows": 7,
+      "columns": [
+        "asset_id",
+        "asset_name",
+        "software",
+        "exposure",
+        "data_sensitivity",
+        "business_function",
+        "redundancy",
+        "owner",
+        "patchable",
+        "maintenance_window",
+        "compensating_control",
+        "notes",
+        "criticality_score",
+        "tier",
+        "tier_rank",
+        "priority_queue"
+      ],
+      "sha256": "ce1c1d46cb2110cecacb3dda22ebea86c1953a312d71886bf78ff9108bb09231"
+    },
+    "small_clinic.csv": {
+      "rows": 7,
+      "columns": [
+        "asset_id",
+        "asset_name",
+        "software",
+        "exposure",
+        "data_sensitivity",
+        "business_function",
+        "redundancy",
+        "owner",
+        "patchable",
+        "maintenance_window",
+        "compensating_control",
+        "notes",
+        "criticality_score",
+        "tier",
+        "tier_rank",
+        "priority_queue"
+      ],
+      "sha256": "78a0711bae98cc21a9c467a6748dec6e93411d28511c261ecbf41ee9bdba2b85"
+    },
+    "sme_retail.csv": {
+      "rows": 7,
+      "columns": [
+        "asset_id",
+        "asset_name",
+        "software",
+        "exposure",
+        "data_sensitivity",
+        "business_function",
+        "redundancy",
+        "owner",
+        "patchable",
+        "maintenance_window",
+        "compensating_control",
+        "notes",
+        "criticality_score",
+        "tier",
+        "tier_rank",
+        "priority_queue"
+      ],
+      "sha256": "a0d42395110982af4dced9eb438ad5537daef40edf6ddaa2c761ac16953f5a8f"
+    },
+    "university_dept.csv": {
+      "rows": 9,
+      "columns": [
+        "asset_id",
+        "asset_name",
+        "software",
+        "exposure",
+        "data_sensitivity",
+        "business_function",
+        "redundancy",
+        "owner",
+        "patchable",
+        "maintenance_window",
+        "compensating_control",
+        "notes",
+        "criticality_score",
+        "tier",
+        "tier_rank",
+        "priority_queue"
+      ],
+      "sha256": "13af448b7be936b86baca05bb2b0d95d9bc15dee129686433ae1f748bd572533"
+    }
+  },
+  "inventory_required_columns": [
+    "asset_id",
+    "asset_name",
+    "software",
+    "exposure",
+    "data_sensitivity",
+    "business_function",
+    "redundancy"
+  ],
+  "inventory_optional_columns": [
+    "owner",
+    "patchable",
+    "maintenance_window",
+    "compensating_control",
+    "notes"
+  ],
+  "validation": {
+    "errors": [],
+    "warnings": [
+      "no EPSS snapshot date in a .meta.json sidecar. Rebuild with src/ingest.py before using this file for a confirmatory result.",
+      "46 KEV additions after the label horizon 2025-06-30 are present; ensure evaluation filters labels to the horizon."
+    ]
+  }
+}

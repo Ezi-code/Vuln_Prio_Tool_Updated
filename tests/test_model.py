@@ -88,6 +88,42 @@ def test_apply_model_keeps_most_critical_asset():
     assert out.loc[out["cve_id"] == "C1", "asset_name"].iloc[0] == "database"
 
 
+def test_apply_model_uses_asset_tier_as_priority_category():
+    pairs = pd.DataFrame({
+        "cve_id": ["C1", "C2", "C3"],
+        "asset_id": ["A1", "A2", "A3"],
+        "asset_name": ["low", "critical", "high"],
+        "criticality_score": [2, 11, 8],
+        "tier": ["Low", "Critical", "High"],
+        "tier_rank": [0, 3, 2],
+        "priority_queue": ["Monitor", "Patch now", "Patch next"],
+        "kev_at_cutoff": [False, False, False],
+        "epss": [0.90, 0.50, 0.70],
+        "cvss": [9.0, 5.0, 7.0],
+    })
+    out = apply_model(pairs, 0.40)
+    assert list(out["asset_tier"]) == ["Critical", "High", "Low"]
+    assert list(out["priority_queue"]) == ["Patch now", "Patch next", "Monitor"]
+
+
+def test_apply_model_capacity_is_separate_from_gate():
+    pairs = pd.DataFrame({
+        "cve_id": ["C1", "C2", "C3"],
+        "asset_id": ["A1", "A2", "A3"],
+        "asset_name": ["low", "critical", "high"],
+        "criticality_score": [2, 11, 8],
+        "tier": ["Low", "Critical", "High"],
+        "tier_rank": [0, 3, 2],
+        "priority_queue": ["Monitor", "Patch now", "Patch next"],
+        "kev_at_cutoff": [False, False, False],
+        "epss": [0.90, 0.50, 0.70],
+        "cvss": [9.0, 5.0, 7.0],
+    })
+    out = apply_model(pairs, 0.40, capacity=2)
+    assert len(out) == 2
+    assert list(out["cve_id"]) == ["C2", "C3"]
+
+
 def test_tier_boundaries():
     assert tier_from_total(0) == "Low"
     assert tier_from_total(3) == "Low"

@@ -9,7 +9,8 @@ EPSS threshold is FIXED (chosen on the training period); --gate-share switches
 to the label-free per-inventory percentile gate. Nothing is tuned here.
 
 Per inventory we measure, within that organization's own CVE pool and at
-workload budgets of 2%, 5% and 10% of the pool:
+workload budgets (default 10%, 20% and 30%; pass --budgets to reproduce the
+capacity-constrained 2%/5% analysis):
   recall            share of later-exploited CVEs found in the top budget
   weighted recall   same, but each positive weighted by its asset's tier
                     (Low=1, Medium=2, High=3, Critical=4)
@@ -21,7 +22,7 @@ Strategies: Model = gate -> tier -> CVSS (proposed). Ablations: Gate+CVSS
 
 Usage:
     python src/montecarlo.py --cutoff 2024-06-30 --horizon-end 2025-06-30 \
-        --epss-threshold 0.005 --n 300
+        --gate-share 0.20 --budgets 0.10,0.20,0.30 --n 300
 """
 import argparse
 from pathlib import Path
@@ -109,7 +110,7 @@ def build_pool(base, assets, token_sets):
     return base.merge(m, on="cve_id")
 
 
-def eval_pool(pool, thr, pos_index, n_pos, gate_share=None):
+def eval_pool(pool, thr, pos_index, n_pos, gate_share=None, budgets=BUDGETS):
     n = len(pool)
     pos = pool["exploited_after"].to_numpy()
     w = (pool["tier_rank"] + 1).to_numpy()
@@ -144,7 +145,7 @@ def eval_pool(pool, thr, pos_index, n_pos, gate_share=None):
     out = {"pool": n, "positives": int(P), "gate_share": float(pool["gate"].mean())}
     found = {}
     hc_base = float((pool["tier_rank"] >= 2).mean())
-    for b in BUDGETS:
+    for b in budgets:
         k = max(1, int(round(b * n)))
         for s_, o in orders.items():
             top = o.head(k)
@@ -202,10 +203,14 @@ def main():
     ap.add_argument("--cutoff", required=True)
     ap.add_argument("--horizon-end", default=None)
     ap.add_argument("--data", default="data/processed/vulns.csv")
-    ap.add_argument("--epss-threshold", type=float, default=0.005)
+    ap.add_argument("--epss-threshold", type=float, default=0.04267,
+                    help="Frozen Stage 1 EPSS threshold (default: 0.04267)")
     ap.add_argument("--gate-share", type=float, default=None,
                     help="Label-free alternative: gate the top share of each "
                          "inventory's EPSS distribution (e.g. 0.02).")
+    ap.add_argument("--budgets", default="0.10,0.20,0.30",
+                    help="Comma-separated final-list shares, e.g. "
+                         "0.02,0.05,0.10,0.20,0.30")
     ap.add_argument("--outdir", default="results",
                     help="Directory for montecarlo.csv")
     ap.add_argument("--n", type=int, default=300, help="random inventories")
@@ -216,6 +221,9 @@ def main():
         raise SystemExit("--gate-share must be between 0 and 1 (e.g. 0.02)")
     pd.set_option("display.width", 220)
     rng = np.random.default_rng(a.seed)
+    BUD = tuple(float(x) for x in a.budgets.split(","))
+    if not BUD or any(not 0 < b <= 1 for b in BUD):
+        raise SystemExit("--budgets must be comma-separated shares in (0, 1]")
 
     df = load(a.data, a.cutoff, a.horizon_end)
     df["products"] = df["products"].fillna("")
@@ -236,11 +244,11 @@ def main():
     pos_index = {c: i for i, c in enumerate(pos_ids)}
     n_pos = len(pos_ids)
     rows, Pm, Wm = [], [], []
-    Fm = {(s_, b): [] for s_ in STRATS for b in BUDGETS}
+    Fm = {(s_, b): [] for s_ in STRATS for b in BUD}
     for _ in range(a.n):
         pool = build_pool(base, sample_inventory(rng), sets)
         r = (eval_pool(pool, a.epss_threshold, pos_index, n_pos,
-                       gate_share=a.gate_share)
+                       gate_share=a.gate_share, budgets=BUD)
              if pool is not None else None)
         if r:
             out, arr = r
@@ -265,18 +273,18 @@ def main():
         print(f"\n=== {title}; mean [95% CI, resampling inventories AND positives] ===")
         print(pd.DataFrame({
             f"top {int(b*100)}%": {s_: fmt(pt[(metric, s_, b)], boot[(metric, s_, b)]).replace("+", "")
-                                    for s_ in STRATS} for b in BUDGETS}).to_string())
+                                    for s_ in STRATS} for b in BUD}).to_string())
         print(f"\n--- {title}: Model MINUS each alternative "
               f"(a CI that excludes 0 holds up under resampling) ---")
         print(pd.DataFrame({
             f"top {int(b*100)}%": {s_: fmt(pt[(metric, 'Model', b)] - pt[(metric, s_, b)],
                                            boot[(metric, 'Model', b)] - boot[(metric, s_, b)])
-                                    for s_ in STRATS if s_ != "Model"} for b in BUDGETS}).to_string())
+                                    for s_ in STRATS if s_ != "Model"} for b in BUD}).to_string())
 
     print("\n=== Share of the top list on High/Critical assets; mean [95% CI, inventories only] ===")
     print(pd.DataFrame({
         f"top {int(b*100)}%": {s_: ci(res[f'{s_}|{b}|hc'], rng) for s_ in STRATS}
-        for b in BUDGETS}).to_string())
+        for b in BUD}).to_string())
 
 
 if __name__ == "__main__":

@@ -1,0 +1,5 @@
+asset_id,asset_name,software,exposure,data_sensitivity,business_function,redundancy,owner,patchable,maintenance_window,compensating_control,notes
+A1,Staff workstations,microsoft:windows_10;microsoft:office;google:chrome,0,1,1,0,IT,unknown,,,Example: 4 office PCs
+A2,Public website,wordpress:wordpress;php:php;apache:http_server,3,1,1,2,Web team,yes,Sun 02:00-04:00,,Example: public-facing site
+A3,Patient records server,microsoft:windows_server_2022;microsoft:sql_server,0,3,3,3,Clinical lead,no,,Network isolation and daily backup,Example: cannot reboot during clinic hours
+A4,Firewall,fortinet:fortios,3,1,3,3,Network lead,yes,Wed 23:00-01:00,,Example: internet edge

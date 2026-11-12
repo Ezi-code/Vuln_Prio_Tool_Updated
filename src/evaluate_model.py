@@ -4,11 +4,12 @@ using exactly the metrics of sections 3.1, 5.4 and 5.5.
 
 Metrics
   Coverage            Recall@N with Precision@N
-  Workload reduction  urgent-list size vs patch-everything and vs CVSS>=7.0,
-                      with the share of later-exploited CVEs each list covers
+  Workload reduction  Stage 1 candidate-gate size versus the final operational
+                      list, and coverage of later-exploited CVEs
   Ranking agreement   Spearman's rho and top-N overlap between the model and
                       each baseline
   Feasibility         time to match and rank an inventory on this machine
+  Asset tiers         recall/precision for each of the four priority categories
 Baselines (5.5): CVSS-only, EPSS/KEV-only, FIFO (+ a random reference row).
 Validation (5.6): KEV/EPSS frozen at the cutoff; labels = KEV additions after
 the cutoff, up to --horizon-end. By default the threshold is read from
@@ -20,9 +21,10 @@ baseline.
 
 Usage:
     python src/evaluate_model.py --cutoff 2024-06-30 --horizon-end 2025-06-30
-    python src/evaluate_model.py --cutoff 2024-06-30 --horizon-end 2025-06-30 --budgets 0.1,0.2,0.3
     python src/evaluate_model.py --cutoff 2024-06-30 --horizon-end 2025-06-30 \
-        --gate-share 0.02 --outdir results/optimized
+        --budgets 0.10,0.20,0.30 --budget 0.10
+    python src/evaluate_model.py --cutoff 2024-06-30 --horizon-end 2025-06-30 \
+        --gate-share 0.20 --outdir results/thesis_wide_gate
 
 For a period scored with a different EPSS model version, re-apply the frozen
 RULE (label-free) instead of the frozen number:
@@ -39,7 +41,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from assets import TIER_RANK, explode_products, tier_from_total
+from assets import TIER_RANK, TIERS, explode_products, tier_from_total
 from baselines import load, rank_cvss_only, rank_epss_kev_only, rank_fifo
 from model import rank_pool
 from montecarlo import (CATALOGUE, bootstrap, build_pool, ci, fmt,
@@ -107,10 +109,14 @@ def main():
                          "Overrides the fixed threshold for the Model row.")
     ap.add_argument("--outdir", default="results",
                     help="Directory for per-inventory and summary outputs")
-    ap.add_argument("--budget", type=float, default=0.05)
+    ap.add_argument("--budget", type=float, default=0.10,
+                    help="Final operational list share for the workload table "
+                         "and tier summary (default: 0.10)")
     ap.add_argument("--ns", default="50,100,250,500,1000")
-    ap.add_argument("--budgets", default=None,
-                    help="predefined patching budgets as shares of each list, e.g. 0.1,0.2,0.3 (replaces --ns)")
+    ap.add_argument("--budgets", default="0.10,0.20,0.30",
+                    help="predefined patching budgets as shares of each list, "
+                         "e.g. 0.1,0.2,0.3 (replaces --ns; pass '' to use "
+                         "absolute --ns values)")
     ap.add_argument("--n", type=int, default=300)
     ap.add_argument("--reps", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=123)
@@ -153,8 +159,10 @@ def main():
     sets = token_cve_sets(explode_products(base), tokens)
 
     rows, Pm, sector_of = [], [], []
+    tier_rows = []
     keys = [(s, N) for s in STRATS for N in NS] + \
-           [("UrgModel", 0), ("UrgCVSS7", 0), ("UrgAll", 0)]
+           [("UrgModel", 0), ("UrgModelTop", 0), ("UrgCVSS7", 0),
+            ("UrgAll", 0)]
     if a.rederive_threshold:   # EPSS scales differ between model versions: use pool shares
         q = lambda share: float(base["epss"].quantile(1 - share))
         SENS_T = {"gate off": 0.0, "top 20%": q(0.20), "top 10%": q(0.10),
@@ -195,8 +203,10 @@ def main():
         Pm.append(present); sector_of.append(sector)
 
         def found_of(mask_or_top):
+            obj = (pool.loc[mask_or_top] if isinstance(mask_or_top, pd.Series)
+                   else mask_or_top)
             f = np.zeros(P)
-            ids = mask_or_top.loc[mask_or_top["exploited_after"], "cve_id"]
+            ids = obj.loc[obj["exploited_after"], "cve_id"]
             if len(ids):
                 f[ids.map(pos_index).to_numpy()] = 1.0
             return f
@@ -221,12 +231,26 @@ def main():
         else:
             gate_cut = thr
         gate = pool["kev_at_cutoff"] | (pool["epss"] >= gate_cut)
-        urg = {"UrgModel": gate, "UrgCVSS7": pool["cvss"] >= 7.0,
+        top_model = model_o.head(kN(a.budget, n))
+        urg = {"UrgModel": gate, "UrgModelTop": top_model,
+               "UrgCVSS7": pool["cvss"] >= 7.0,
                "UrgAll": pd.Series(True, index=pool.index)}
         row = {"sector": sector, "pool": n, "positives": int(present.sum())}
         for k, m in urg.items():
-            Fm[(k, 0)].append(found_of(pool[m]))
-            row[k] = int(m.sum())
+            Fm[(k, 0)].append(found_of(m))
+            row[k] = int(m.sum()) if isinstance(m, pd.Series) else int(len(m))
+        for N in NS:
+            top = model_o.head(kN(N, n))
+            for tier in TIERS:
+                pos_mask = pool["exploited_after"] & (pool["tier_rank"] == TIER_RANK[tier])
+                found_mask = top["exploited_after"] & (top["tier_rank"] == TIER_RANK[tier])
+                tier_rows.append({
+                    "sector": sector, "budget": N, "asset_tier": tier,
+                    "positives": int(pos_mask.sum()),
+                    "found": int(found_mask.sum()),
+                    "top_items": int((top["tier_rank"] == TIER_RANK[tier]).sum()),
+                    "top_size": int(len(top)),
+                })
         if a.sensitivity:
             for tn, t in SENS_T.items():
                 m = pool["kev_at_cutoff"] | (pool["epss"] >= t)
@@ -261,25 +285,58 @@ def main():
     print("\n=== 2. WORKLOAD: urgent-list size and coverage of later-exploited CVEs ===")
     allv = res["UrgAll"].to_numpy(float)
     wl = {}
-    for lab, k in (("Model urgent list (Stage 1)", "UrgModel"), ("CVSS >= 7.0 list", "UrgCVSS7"),
-                   ("Patch everything", "UrgAll")):
+    for lab, k in (
+        ("Stage 1 candidate gate", "UrgModel"),
+        (f"Model top {a.budget:.0%} (final list)", "UrgModelTop"),
+        ("CVSS >= 7.0 list", "UrgCVSS7"),
+        ("Patch everything", "UrgAll"),
+    ):
         wl[lab] = {"mean size": f"{res[k].mean():.0f}",
                    "% of list": f"{100 * (res[k] / res['UrgAll']).mean():.1f}%",
                    "coverage": f2(pt[("recall", k, 0)], boot[("recall", k, 0)])}
     print(pd.DataFrame(wl).T.to_string())
-    print("Workload reduction achieved by the model's urgent list, mean [95% CI over inventories]:")
-    print(f"  vs patch-everything: {ci(1 - res['UrgModel'].to_numpy() / allv, rng)}")
-    print(f"  vs CVSS >= 7.0     : {ci(1 - res['UrgModel'].to_numpy() / res['UrgCVSS7'].to_numpy(), rng)}")
-    print("  (EPSS/KEV-only filtering flags the same set as Stage 1, so its urgent list is identical.)")
+    print("Workload reduction achieved by the final model list, mean [95% CI over inventories]:")
+    print(f"  vs patch-everything: {ci(1 - res['UrgModelTop'].to_numpy() / allv, rng)}")
+    print(f"  vs CVSS >= 7.0     : {ci(1 - res['UrgModelTop'].to_numpy() / res['UrgCVSS7'].to_numpy(), rng)}")
+    print("  (The Stage 1 candidate gate is reported separately; it may be wider than the final list.)")
 
-    print("\n=== 3. RANKING AGREEMENT of the model with each baseline (mean [95% CI]) ===")
+    tier_df = pd.DataFrame(tier_rows)
+    tier_summary = {}
+    if len(tier_df):
+        for N in NS:
+            d = tier_df[tier_df["budget"] == N]
+            total_pos = int(d["positives"].sum())
+            total_found = int(d["found"].sum())
+            rows_t = {}
+            for tier in TIERS:
+                t = d[d["asset_tier"] == tier]
+                pos, found = int(t["positives"].sum()), int(t["found"].sum())
+                top_items = int(t["top_items"].sum())
+                rows_t[tier] = {
+                    "positives": pos,
+                    "found": found,
+                    "recall": float(found / pos) if pos else float("nan"),
+                    "share_of_positives": float(pos / total_pos) if total_pos else float("nan"),
+                    "share_of_found": float(found / total_found) if total_found else float("nan"),
+                    "top_items": top_items,
+                    "precision": float(found / top_items) if top_items else float("nan"),
+                }
+            tier_summary[nlabel(N)] = rows_t
+        primary = a.budget
+        primary_key = nlabel(primary)
+        if primary_key not in tier_summary:
+            primary_key = nlabel(NS[0])
+        print(f"\n=== 3. ASSET TIERS AS PRIORITY CATEGORIES: Model at {primary_key} final list ===")
+        print(pd.DataFrame(tier_summary[primary_key]).T.to_string())
+
+    print("\n=== 4. RANKING AGREEMENT of the model with each baseline (mean [95% CI]) ===")
     print(pd.DataFrame({
         "Spearman rho": {b: ci(np.array(rho[b]), rng) for b in BASES},
         "top-100 overlap": {b: ci(np.array(ovl[(b, 100)]), rng) for b in BASES},
         "top-250 overlap": {b: ci(np.array(ovl[(b, 250)]), rng) for b in BASES}}).to_string())
 
     tm, tr = np.array(t_match) * 1000, np.array(t_rank) * 1000
-    print("\n=== 4. COMPUTATIONAL FEASIBILITY (no GPU, no paid feeds) ===")
+    print("\n=== 5. COMPUTATIONAL FEASIBILITY (no GPU, no paid feeds) ===")
     print(f"Machine: {platform.platform()}, {os.cpu_count()} CPU threads, Python {platform.python_version()}")
     print(f"Matching an inventory to its CVEs: median {np.median(tm):.0f} ms, max {tm.max():.0f} ms")
     print(f"Ranking one inventory ({int(np.min(sizes))}-{int(np.max(sizes))} CVEs): "
@@ -334,13 +391,18 @@ def main():
         "precision": {s: {nlabel(N): mean_ci(np.array(prec[(s, N)]))
                           for N in NS} for s in STRATS},
         "workload": {
-            "model_urgent_mean_size": float(res["UrgModel"].mean()),
-            "model_urgent_pct_of_list": float(100 * (res["UrgModel"] / res["UrgAll"]).mean()),
-            "model_urgent_coverage": float(pt[("recall", "UrgModel", 0)]),
+            "stage1_gate_mean_size": float(res["UrgModel"].mean()),
+            "stage1_gate_pct_of_list": float(100 * (res["UrgModel"] / res["UrgAll"]).mean()),
+            "stage1_gate_coverage": float(pt[("recall", "UrgModel", 0)]),
+            "model_top_budget": float(a.budget),
+            "model_top_mean_size": float(res["UrgModelTop"].mean()),
+            "model_top_pct_of_list": float(100 * (res["UrgModelTop"] / res["UrgAll"]).mean()),
+            "model_top_coverage": float(pt[("recall", "UrgModelTop", 0)]),
             "cvss7_mean_size": float(res["UrgCVSS7"].mean()),
             "cvss7_pct_of_list": float(100 * (res["UrgCVSS7"] / res["UrgAll"]).mean()),
             "cvss7_coverage": float(pt[("recall", "UrgCVSS7", 0)]),
         },
+        "by_asset_tier": tier_summary,
         "ranking": {
             "spearman": {b: mean_ci(np.array(rho[b])) for b in BASES},
             "top100_overlap": {b: mean_ci(np.array(ovl[(b, 100)])) for b in BASES},

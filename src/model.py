@@ -47,19 +47,29 @@ def gate_cutoff(pool, thr=None, gate_share=None):
     return float(thr)
 
 
-def rank_pool(pool, thr=None, lam=None, gate_share=None, kev_first=False):
+def rank_pool(pool, thr=None, lam=None, gate_share=None, kev_first=False,
+              capacity=None):
     """Return the pool ordered best-first. Needs columns: kev_at_cutoff, epss,
     cvss, tier_rank.
 
     The gate is either a fixed EPSS threshold (`thr`) or the top
     `gate_share` of this pool's EPSS distribution; see `gate_cutoff`.
+
+    `capacity` is an optional final-list size.  It is applied AFTER ranking,
+    so it is deliberately separate from the Stage 1 candidate gate.  This is
+    what lets Stage 2 and Stage 3 change which CVEs make the final list when
+    the candidate gate is broader than the operational budget.
     """
+    if capacity is not None and capacity < 0:
+        raise ValueError("capacity must be non-negative")
     cutoff = gate_cutoff(pool, thr, gate_share)
     p = pool.assign(gate=pool["kev_at_cutoff"] | (pool["epss"] >= cutoff))
     keys = ["gate"] + (["kev_at_cutoff"] if kev_first else [])
     if lam is None:
         keys += ["tier_rank", "cvss", "epss"]
-        return p.sort_values(keys, ascending=False, kind="stable")
-    p["score"] = lam * p["tier_rank"] / TIER_MAX + p["cvss"] / 10.0
-    keys += ["score", "epss"]
-    return p.sort_values(keys, ascending=False, kind="stable")
+        out = p.sort_values(keys, ascending=False, kind="stable")
+    else:
+        p["score"] = lam * p["tier_rank"] / TIER_MAX + p["cvss"] / 10.0
+        keys += ["score", "epss"]
+        out = p.sort_values(keys, ascending=False, kind="stable")
+    return out.head(capacity) if capacity is not None else out

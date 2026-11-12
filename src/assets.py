@@ -20,6 +20,21 @@ CRITERIA = ["exposure", "data_sensitivity", "business_function", "redundancy"]
 TIERS = ["Low", "Medium", "High", "Critical"]
 TIER_RANK = {t: i for i, t in enumerate(TIERS)}
 
+# Asset tiers are also the operational priority categories.  Keeping the
+# queue labels in one place avoids a second, conflicting taxonomy in the
+# report and the UI.
+QUEUE_BY_TIER = {
+    "Critical": "Patch now",
+    "High": "Patch next",
+    "Medium": "Scheduled",
+    "Low": "Monitor",
+}
+
+REQUIRED_COLUMNS = ["asset_id", "asset_name", "software"] + CRITERIA
+OPTIONAL_COLUMNS = ["owner", "patchable", "maintenance_window",
+                    "compensating_control", "notes"]
+REQUIRED_SOFTWARE_FORMAT = "semicolon-separated vendor:product tokens"
+
 
 def tier_from_total(total):
     if total <= 3:
@@ -31,17 +46,67 @@ def tier_from_total(total):
     return "Critical"
 
 
-def load_inventory(path):
-    """Read an inventory CSV and compute each asset's criticality tier."""
-    inv = pd.read_csv(path)
+def validate_inventory(path_or_df):
+    """Validate an inventory and return a normalised DataFrame.
+
+    The CSV does not require a CMDB.  Only the seven required columns are
+    needed; the optional columns support operational constraints such as
+    assets that cannot be patched immediately.
+    """
+    if isinstance(path_or_df, (str, Path)):
+        path = Path(path_or_df)
+        inv = pd.read_csv(path)
+        label = str(path)
+    else:
+        inv = path_or_df.copy()
+        label = "inventory"
+
+    missing = [c for c in REQUIRED_COLUMNS if c not in inv.columns]
+    if missing:
+        raise ValueError(
+            f"{label}: missing required columns {missing}. "
+            f"Required: {REQUIRED_COLUMNS}. "
+            f"Optional: {OPTIONAL_COLUMNS}."
+        )
+
+    if inv["asset_id"].isna().any() or inv["asset_id"].astype(str).str.strip().eq("").any():
+        raise ValueError(f"{label}: asset_id must be present and non-empty")
+    if inv["asset_id"].duplicated().any():
+        dupes = sorted(inv.loc[inv["asset_id"].duplicated(), "asset_id"].astype(str).unique())
+        raise ValueError(f"{label}: duplicate asset_id values: {dupes}")
+    if inv["asset_name"].isna().any():
+        raise ValueError(f"{label}: asset_name must be present")
+    if inv["software"].isna().any() or inv["software"].astype(str).str.strip().eq("").any():
+        raise ValueError(f"{label}: software must be present; use {REQUIRED_SOFTWARE_FORMAT}")
+
     for c in CRITERIA:
-        inv[c] = inv[c].astype(int)
+        inv[c] = pd.to_numeric(inv[c], errors="raise").astype(int)
         if not inv[c].between(0, 3).all():
-            raise ValueError(f"{path}: '{c}' must be between 0 and 3")
+            raise ValueError(f"{label}: '{c}' must be between 0 and 3")
+
+    for c in OPTIONAL_COLUMNS:
+        if c not in inv.columns:
+            inv[c] = ""
+    if "patchable" in inv.columns:
+        allowed = {"", "yes", "no", "unknown", "y", "n"}
+        vals = inv["patchable"].fillna("").astype(str).str.strip().str.lower()
+        bad = sorted(set(vals) - allowed)
+        if bad:
+            raise ValueError(
+                f"{label}: patchable must be one of yes/no/unknown (got {bad})"
+            )
+        inv["patchable"] = vals
+
     inv["criticality_score"] = inv[CRITERIA].sum(axis=1)
     inv["tier"] = inv["criticality_score"].map(tier_from_total)
     inv["tier_rank"] = inv["tier"].map(TIER_RANK)
+    inv["priority_queue"] = inv["tier"].map(QUEUE_BY_TIER)
     return inv
+
+
+def load_inventory(path):
+    """Read an inventory CSV and compute each asset's criticality tier."""
+    return validate_inventory(path)
 
 
 # --------------------------------------------------- CVE <-> asset matching
@@ -73,9 +138,10 @@ def match_vulns(vulns, prod_df, inv):
     if not parts:
         return pd.DataFrame()
     pairs = pd.concat(parts).drop_duplicates(["cve_id", "asset_id"])
-    pairs = pairs.merge(
-        inv[["asset_id", "asset_name", "criticality_score", "tier", "tier_rank"]],
-        on="asset_id")
+    asset_cols = ["asset_id", "asset_name", "criticality_score", "tier",
+                  "tier_rank", "priority_queue"]
+    asset_cols += [c for c in OPTIONAL_COLUMNS if c in inv.columns]
+    pairs = pairs.merge(inv[asset_cols], on="asset_id")
     return pairs.merge(vulns, on="cve_id")
 
 

@@ -8,41 +8,66 @@ evaluation against the baselines on each inventory.
   (Any remaining ties are broken by EPSS, a documented implementation choice.)
   Non-gated CVEs are deprioritized, not discarded.
 
+The four asset tiers are the operational priority categories.  The output also
+contains a queue label from QUEUE_BY_TIER and one CSV per tier.  Stage 1 is a
+candidate gate; --capacity selects the final list.
+
 Usage (venv active):
     python src/assets.py
     python src/scoring.py --cutoff 2024-06-30
-    python src/scoring.py --cutoff 2024-06-30 --epss-threshold 0.088
-    python src/scoring.py --cutoff 2024-06-30 --gate-share 0.02 \
-        --outdir results/optimized
+    python src/scoring.py --cutoff 2024-06-30 --epss-threshold 0.04267
+    python src/scoring.py --cutoff 2024-06-30 --gate-share 0.20 \
+        --capacity 500 --outdir results/operational
 """
 import argparse
 from pathlib import Path
 
 import pandas as pd
 
-from assets import explode_products, load_inventory, match_vulns
+from assets import (QUEUE_BY_TIER, TIERS, explode_products, load_inventory,
+                    match_vulns)
 from baselines import (load, rank_cvss_only, rank_epss_kev_only, rank_fifo,
                        recall_at_n)
 from model import gate_cutoff, rank_pool
 
 
 # ----------------------------------------------------------------- model
-def apply_model(pairs, thr, gate_share=None):
+def add_priority_fields(ranked):
+    """Expose the asset tier as the priority category and add the operational
+    queue label.  This is deliberately the SAME four-tier instrument used by
+    Stage 2; there is no second three-level threat taxonomy.
+    """
+    out = ranked.copy()
+    out["asset_tier"] = out["tier"]
+    out["priority_queue"] = out["asset_tier"].map(QUEUE_BY_TIER)
+    return out
+
+
+def apply_model(pairs, thr, gate_share=None, capacity=None):
     """Rank (CVE, asset) pairs, then keep each CVE once at its most critical
     asset. Returns one row per CVE, best first.
 
     KEV-at-cutoff CVEs are kept in the operational ranking and placed first;
     the evaluation functions below use the Pool B subset (no known KEV) so the
     metrics measure new exploitation rather than already-known threats.
+
+    `capacity` is an optional final-list size.  The Stage 1 gate may be wider
+    than this, which is what allows Stages 2 and 3 to change membership.
     """
     ranked = rank_pool(pairs, thr, None, gate_share=gate_share,
                        kev_first=True)
-    return ranked.drop_duplicates("cve_id").reset_index(drop=True)
+    ranked = ranked.drop_duplicates("cve_id").reset_index(drop=True)
+    ranked = add_priority_fields(ranked)
+    if capacity is not None:
+        ranked = ranked.head(capacity).reset_index(drop=True)
+    return ranked
 
 
 def explain(r, thr, gate_share=None):
     if r["kev_at_cutoff"]:
-        why = f"listed in CISA KEV (added {r['kev_date_added']:%Y-%m-%d})"
+        d = r.get("kev_date_added")
+        when = f" (added {d:%Y-%m-%d})" if pd.notna(d) else ""
+        why = f"listed in CISA KEV{when}"
     elif r["gate"]:
         if gate_share is not None:
             why = (f"EPSS {r['epss']:.3f} is in the top {gate_share:.1%} "
@@ -51,8 +76,13 @@ def explain(r, thr, gate_share=None):
             why = f"EPSS {r['epss']:.3f} is above the {thr} threshold"
     else:
         why = "not in KEV and EPSS below threshold (deprioritized)"
-    return (f"{why}; affects {r['asset_name']} (tier {r['tier']}); "
-            f"CVSS {r['cvss']:.1f}")
+    extra = ""
+    if str(r.get("patchable", "")).lower() == "no":
+        extra = "; asset marked unpatchable - apply compensating control"
+    return (f"{why}; affects {r['asset_name']} "
+            f"(asset tier {r['asset_tier']}, "
+            f"criticality {r['criticality_score']}/12; "
+            f"{r['priority_queue']}); CVSS {r['cvss']:.1f}{extra}")
 
 
 # ------------------------------------------------------------ evaluation
@@ -78,14 +108,18 @@ def recall_table(pairs, thr, ns, gate_share=None):
     return pd.DataFrame(rows).set_index("strategy").round(3), ranked["Model"], total
 
 
-def urgent_table(pairs, thr, gate_share=None):
+def urgent_table(pairs, thr, gate_share=None, capacity=None):
     cves = cve_level(pairs)
     total = int(cves["exploited_after"].sum())
     cutoff = gate_cutoff(cves, thr, gate_share)
     gate = cves["kev_at_cutoff"] | (cves["epss"] >= cutoff)
-    sets = {"Model urgent set (Stage 1 gate)": gate,
-            "CVSS >= 7.0": cves["cvss"] >= 7.0,
-            "Patch everything": pd.Series(True, index=cves.index)}
+    sets = {"Model urgent set (Stage 1 gate)": gate}
+    if capacity is not None:
+        final_ids = apply_model(pairs, thr, gate_share=gate_share,
+                                capacity=capacity)["cve_id"]
+        sets["Model final list (capacity)"] = cves["cve_id"].isin(final_ids)
+    sets["CVSS >= 7.0"] = cves["cvss"] >= 7.0
+    sets["Patch everything"] = pd.Series(True, index=cves.index)
     rows = []
     for name, m in sets.items():
         found = int(cves.loc[m, "exploited_after"].sum())
@@ -94,6 +128,45 @@ def urgent_table(pairs, thr, gate_share=None):
                      "exploited found": found,
                      "coverage": round(found / total, 3) if total else float("nan")})
     return pd.DataFrame(rows).set_index("urgent set")
+
+
+def tier_summary(ranked, top_n=None):
+    """Summarise the four asset tiers as operational priority categories.
+
+    Counts are for the full ranked CVE list; when `top_n` is supplied, the
+    table also shows how many of those items fall in the displayed top list.
+    """
+    total = len(ranked)
+    shown = ranked.head(top_n) if top_n is not None else ranked
+    rows = []
+    for tier in TIERS:
+        sub = ranked[ranked["asset_tier"] == tier]
+        rows.append({
+            "asset_tier": tier,
+            "priority_queue": QUEUE_BY_TIER[tier],
+            "cves": int(len(sub)),
+            "% of ranked": round(100 * len(sub) / total, 1) if total else 0.0,
+            f"in top {top_n}": int((shown["asset_tier"] == tier).sum())
+            if top_n is not None else int(len(sub)),
+            "later_exploited": int(sub["exploited_after"].sum())
+            if "exploited_after" in sub.columns else 0,
+            "unpatchable": int((sub["patchable"] == "no").sum())
+            if "patchable" in sub.columns else 0,
+            "mean_cvss": round(float(sub["cvss"].mean()), 2) if len(sub) else float("nan"),
+            "mean_epss": round(float(sub["epss"].mean()), 4) if len(sub) else float("nan"),
+        })
+    return pd.DataFrame(rows).set_index("asset_tier")
+
+
+def tier_outputs(ranked, outdir, stem, columns, per_tier=100):
+    """Write one CSV per asset tier, preserving the same ranked order."""
+    paths = {}
+    for tier in TIERS:
+        sub = ranked[ranked["asset_tier"] == tier].head(per_tier)
+        path = Path(outdir) / f"{stem}_{tier.lower()}.csv"
+        sub[columns].to_csv(path, index=False)
+        paths[tier] = path
+    return paths
 
 
 def run(df, args):
@@ -119,20 +192,34 @@ def run(df, args):
             continue
 
         # Operational ranking: known KEV first, then the model's order.
+        capacity = getattr(args, "capacity", None)
         operational = apply_model(pairs, args.epss_threshold,
-                                  gate_share=gate_share)
-        top = operational.head(100).copy()
-        top["reason"] = top.apply(
+                                  gate_share=gate_share,
+                                  capacity=capacity)
+        operational["reason"] = operational.apply(
             lambda r: explain(r, args.epss_threshold, gate_share), axis=1)
-        cols = ["cve_id", "asset_name", "tier", "cvss", "epss", "gate",
-                "kev_at_cutoff", "exploited_after", "reason"]
-        if "kev_date_added" in top.columns:
-            cols.insert(7, "kev_date_added")
+        top_n = int(getattr(args, "top", 100))
+        top = operational.head(top_n).copy()
+        cols = ["cve_id", "asset_id", "asset_name", "matched_product",
+                "asset_tier", "criticality_score", "priority_queue",
+                "tier_rank", "cvss", "epss", "gate", "kev_at_cutoff",
+                "kev_date_added", "exploited_after", "owner", "patchable",
+                "maintenance_window", "compensating_control", "reason"]
+        cols = [c for c in cols if c in top.columns]
         out = outdir / f"ranked_{f.stem}.csv"
         top[cols].to_csv(out, index=False)
         n_kev = int(operational["kev_at_cutoff"].sum())
-        print(f"  operational top-100 written to {out} "
+        print(f"  operational top-{len(top)} written to {out} "
               f"({n_kev} KEV-at-cutoff CVEs in this inventory; ranked first)")
+
+        print("\n  Asset tiers as priority categories")
+        print(tier_summary(operational, top_n=len(top)).to_string())
+        tier_paths = tier_outputs(
+            operational, outdir, f"tier_{f.stem}", cols,
+            per_tier=int(getattr(args, "tier_capacity", 100)))
+        if tier_paths:
+            print("  tier queues: " + ", ".join(
+                f"{t}={p.name}" for t, p in tier_paths.items()))
 
         # Evaluation pool B: CVEs not already in KEV at the cutoff.
         pool = pairs[~pairs["kev_at_cutoff"]].copy()
@@ -148,7 +235,8 @@ def run(df, args):
         print("\n  Recall@N (CVE level)"); print(table.to_string())
         print("\n  Urgent-set size and coverage")
         print(urgent_table(pool, args.epss_threshold,
-                           gate_share=gate_share).to_string())
+                           gate_share=gate_share,
+                           capacity=capacity).to_string())
 
     if args.sweep:
         print("\n######## EPSS threshold sensitivity (all inventories pooled) ########")
@@ -174,12 +262,20 @@ def main():
     ap.add_argument("--horizon-end", default=None,
                     help="Only count KEV additions up to this date (YYYY-MM-DD)")
     ap.add_argument("--inventories", default="data/inventories")
-    ap.add_argument("--epss-threshold", type=float, default=0.088)
+    ap.add_argument("--epss-threshold", type=float, default=0.04267,
+                    help="Frozen Stage 1 EPSS threshold (default: 0.04267)")
     ap.add_argument("--gate-share", type=float, default=None,
                     help="Label-free alternative to --epss-threshold: gate the "
                          "top share of each inventory's EPSS distribution "
                          "(e.g. 0.02 = top 2%%).")
     ap.add_argument("--ns", default="25,50,100,250,500")
+    ap.add_argument("--top", type=int, default=100,
+                    help="Rows in the main ranked CSV (default: 100)")
+    ap.add_argument("--capacity", type=int, default=None,
+                    help="Optional final-list capacity. The Stage 1 gate may be "
+                         "wider; Stage 2/3 then select this final list.")
+    ap.add_argument("--tier-capacity", type=int, default=100,
+                    help="Maximum rows per asset-tier queue CSV (default: 100)")
     ap.add_argument("--outdir", default="results",
                     help="Directory for ranked_*.csv outputs")
     ap.add_argument("--sweep", default="0.001,0.005,0.01,0.05,0.088,0.2",
